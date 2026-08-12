@@ -3,17 +3,13 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'api_config.dart';
 
 class AuthRepository extends ChangeNotifier {
   final SharedPreferences _prefs;
   
-  // Dynamic base URL for local testing vs production
-  String get _baseUrl {
-    if (kReleaseMode) return 'https://edumynt.org/api/users';
-    if (kIsWeb) return 'http://localhost:3000/api/users';
-    if (Platform.isAndroid) return 'http://10.0.2.2:3000/api/users';
-    return 'http://localhost:3000/api/users';
-  }
+  // Base URL specifically for the Users collection endpoints
+  String get _baseUrl => '${ApiConfig.baseUrl}/api/users';
 
   String? _token;
   bool _isLoading = true;
