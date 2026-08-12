@@ -32,7 +32,7 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(9999), // radius-full
+            borderRadius: BorderRadius.circular(16), // large rounded corners
           ),
           elevation: 0,
         ),
@@ -76,7 +76,7 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(9999), // radius-full
+            borderRadius: BorderRadius.circular(16), // large rounded corners
           ),
           elevation: 0,
         ),
