@@ -2,92 +2,91 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-/// AppTheme builds the Material 3 ThemeData using our design tokens.
 class AppTheme {
   static ThemeData get lightTheme {
-    final base = ThemeData(
-      useMaterial3: true,
+    return ThemeData(
       brightness: Brightness.light,
+      primaryColor: AppColors.primary,
+      scaffoldBackgroundColor: AppColors.backgroundLight,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
-        onPrimary: Colors.white,
         secondary: AppColors.secondary,
-        onSecondary: Colors.white,
-        error: AppColors.danger,
-        onError: Colors.white,
         surface: AppColors.surfaceLight,
-        onSurface: AppColors.textLight,
-        outline: AppColors.borderLight,
+        error: AppColors.error,
       ),
-      scaffoldBackgroundColor: AppColors.bgLight,
-    );
-
-    return base.copyWith(
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme).apply(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme().apply(
         bodyColor: AppColors.textLight,
         displayColor: AppColors.textLight,
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // large rounded corners
-          ),
-          elevation: 0,
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceLight,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderLight),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        labelStyle: const TextStyle(color: AppColors.textMutedLight),
       ),
-      cardTheme: const CardThemeData(
-        color: AppColors.surfaceLight,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)), // radius-md
-          side: BorderSide(color: AppColors.borderLight, width: 2),
-        ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.borderLight,
+        thickness: 1,
       ),
     );
   }
 
   static ThemeData get darkTheme {
-    final base = ThemeData(
-      useMaterial3: true,
+    return ThemeData(
       brightness: Brightness.dark,
+      primaryColor: AppColors.primary,
+      scaffoldBackgroundColor: AppColors.backgroundDark,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
-        onPrimary: Colors.white,
         secondary: AppColors.secondary,
-        onSecondary: Colors.white,
-        error: AppColors.danger,
-        onError: Colors.white,
         surface: AppColors.surfaceDark,
-        onSurface: AppColors.textDark,
-        outline: AppColors.borderDark,
+        error: AppColors.error,
       ),
-      scaffoldBackgroundColor: AppColors.bgDark,
-    );
-
-    return base.copyWith(
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme).apply(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme).apply(
         bodyColor: AppColors.textDark,
         displayColor: AppColors.textDark,
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // large rounded corners
-          ),
-          elevation: 0,
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surfaceDark,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderDark),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.borderDark),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        labelStyle: const TextStyle(color: AppColors.textMutedDark),
       ),
-      cardTheme: const CardThemeData(
-        color: AppColors.surfaceDark,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)), // radius-md
-          side: BorderSide(color: AppColors.borderDark, width: 2),
-        ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.borderDark,
+        thickness: 1,
       ),
     );
   }
