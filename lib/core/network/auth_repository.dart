@@ -7,8 +7,9 @@ import 'package:flutter/foundation.dart';
 class AuthRepository extends ChangeNotifier {
   final SharedPreferences _prefs;
   
-  // Dynamic base URL for local testing (Android emulator uses 10.0.2.2 for localhost)
+  // Dynamic base URL for local testing vs production
   String get _baseUrl {
+    if (kReleaseMode) return 'https://edumynt.org/api/users';
     if (kIsWeb) return 'http://localhost:3000/api/users';
     if (Platform.isAndroid) return 'http://10.0.2.2:3000/api/users';
     return 'http://localhost:3000/api/users';
