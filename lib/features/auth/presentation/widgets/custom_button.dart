@@ -46,7 +46,7 @@ class CustomButton extends StatelessWidget {
       );
     }
 
-    // 3D effect achieved via Container with bottom border simulating elevation
+    // 3D effect achieved via nested containers
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -54,41 +54,40 @@ class CustomButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            color: isSecondary ? AppColors.surfaceLight : AppColors.primary,
+            color: isSecondary ? Colors.transparent : AppColors.primaryDark,
             borderRadius: BorderRadius.circular(12),
-            border: isSecondary 
-              ? Border.all(color: AppColors.borderLight)
-              : Border(
-                  top: const BorderSide(color: Colors.transparent),
-                  left: const BorderSide(color: Colors.transparent),
-                  right: const BorderSide(color: Colors.transparent),
-                  bottom: const BorderSide(
-                    color: AppColors.primaryDark,
-                    width: 4,
-                  ),
-                ),
           ),
-          child: Center(
-            child: isLoading
-                ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                          isSecondary ? AppColors.primary : Colors.white),
-                    ),
-                  )
-                : Text(
-                    text,
-                    style: TextStyle(
-                      color: isSecondary ? AppColors.textLight : Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isSecondary ? 0 : 4),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: isSecondary ? AppColors.surfaceLight : AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
+                border: isSecondary ? Border.all(color: AppColors.borderLight) : null,
+              ),
+              child: Center(
+                child: isLoading
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              isSecondary ? AppColors.primary : Colors.white),
+                        ),
+                      )
+                    : Text(
+                        text,
+                        style: TextStyle(
+                          color: isSecondary ? AppColors.textLight : Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
           ),
         ),
       ),
