@@ -70,7 +70,7 @@ class AuthRepository extends ChangeNotifier {
   Future<String?> register(String name, String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl'),
+        Uri.parse(_baseUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'name': name,

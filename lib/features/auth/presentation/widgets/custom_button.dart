@@ -23,7 +23,7 @@ class CustomButton extends StatelessWidget {
       return TextButton(
         onPressed: isLoading ? null : onPressed,
         style: TextButton.styleFrom(
-          minimumSize: const Size.infinity, 50),
+          minimumSize: const Size(double.infinity, 50),
           padding: const EdgeInsets.symmetric(vertical: 16),
           foregroundColor: AppColors.textMutedLight,
           shape: RoundedRectangleBorder(
