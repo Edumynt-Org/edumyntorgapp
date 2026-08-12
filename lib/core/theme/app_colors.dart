@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Brand Colors
-  static const Color primary = Color(0xFF2563EB); // Modern Blue
-  static const Color primaryDark = Color(0xFF1D4ED8);
-  static const Color secondary = Color(0xFF10B981); // Emerald
+  // Brand Colors (Duolingo-inspired)
+  static const Color primary = Color(0xFF58CC02); // Vibrant Green
+  static const Color primaryDark = Color(0xFF58A700); // Darker Green for 3D bottom
+  static const Color secondary = Color(0xFF1CB0F6); // Playful Blue
+
   
   // Backgrounds
   static const Color backgroundLight = Color(0xFFFAFAFA);

@@ -47,46 +47,49 @@ class CustomButton extends StatelessWidget {
     }
 
     // 3D effect achieved via Container with bottom border simulating elevation
-    return InkWell(
-      onTap: isLoading ? null : onPressed,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: isSecondary ? AppColors.surfaceLight : AppColors.primary,
-          borderRadius: BorderRadius.circular(12),
-          border: isSecondary 
-            ? Border.all(color: AppColors.borderLight)
-            : Border(
-                top: const BorderSide(color: Colors.transparent),
-                left: const BorderSide(color: Colors.transparent),
-                right: const BorderSide(color: Colors.transparent),
-                bottom: BorderSide(
-                  color: AppColors.primaryDark,
-                  width: 4,
-                ),
-              ),
-        ),
-        child: Center(
-          child: isLoading
-              ? SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        isSecondary ? AppColors.primary : Colors.white),
-                  ),
-                )
-              : Text(
-                  text,
-                  style: TextStyle(
-                    color: isSecondary ? AppColors.textLight : Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isLoading ? null : onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: isSecondary ? AppColors.surfaceLight : AppColors.primary,
+            borderRadius: BorderRadius.circular(12),
+            border: isSecondary 
+              ? Border.all(color: AppColors.borderLight)
+              : Border(
+                  top: const BorderSide(color: Colors.transparent),
+                  left: const BorderSide(color: Colors.transparent),
+                  right: const BorderSide(color: Colors.transparent),
+                  bottom: const BorderSide(
+                    color: AppColors.primaryDark,
+                    width: 4,
                   ),
                 ),
+          ),
+          child: Center(
+            child: isLoading
+                ? SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          isSecondary ? AppColors.primary : Colors.white),
+                    ),
+                  )
+                : Text(
+                    text,
+                    style: TextStyle(
+                      color: isSecondary ? AppColors.textLight : Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+          ),
         ),
       ),
     );
