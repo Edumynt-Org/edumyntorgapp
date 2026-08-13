@@ -16,6 +16,7 @@ class BooksScreen extends StatefulWidget {
 class _BooksScreenState extends State<BooksScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
+  bool _isSearchExpanded = false;
   
   bool _isLoading = true;
   List<BookModel> _books = [];
@@ -59,13 +60,43 @@ class _BooksScreenState extends State<BooksScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('Browse', style: TextStyle(fontWeight: FontWeight.w900)),
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: _isSearchExpanded 
+            ? TextField(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                autofocus: true,
+                style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  hintStyle: TextStyle(color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
+                  border: InputBorder.none,
+                ),
+              )
+            : const Text('Browse', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(_isSearchExpanded ? Icons.close : Icons.search, color: isDark ? Colors.white : Colors.black),
+            onPressed: () {
+              setState(() {
+                _isSearchExpanded = !_isSearchExpanded;
+                if (!_isSearchExpanded) {
+                  _searchController.clear();
+                  _search('');
+                }
+              });
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Column(
         children: [
-          _buildSearchBar(isDark),
           _buildFilterChips(isDark),
           const SizedBox(height: 16),
           Expanded(
@@ -80,34 +111,7 @@ class _BooksScreenState extends State<BooksScreen> {
     );
   }
 
-  Widget _buildSearchBar(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight, width: 2),
-        ),
-        child: TextField(
-          controller: _searchController,
-          onChanged: _onSearchChanged,
-          style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
-          decoration: InputDecoration(
-            hintText: 'Search for books, authors...',
-            hintStyle: TextStyle(color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight, fontWeight: FontWeight.bold),
-            prefixIcon: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text('🔍', style: TextStyle(fontSize: 20)),
-            ),
-            prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildFilterChips(bool isDark) {
     return SizedBox(
@@ -170,7 +174,7 @@ class _BooksScreenState extends State<BooksScreen> {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+        crossAxisCount: 3,
         childAspectRatio: 0.55,
         crossAxisSpacing: 16,
         mainAxisSpacing: 24,

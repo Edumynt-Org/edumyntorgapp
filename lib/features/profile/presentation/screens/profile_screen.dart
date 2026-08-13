@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/network/auth_repository.dart';
+import '../../../../core/theme/theme_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -9,10 +13,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Mock user state
-  final bool _isLoggedIn = false;
-
-  void _showSettingsModal(BuildContext context, bool isDark) {
+  void _showSettingsModal(BuildContext context, bool isDark, bool isLoggedIn) {
     Navigator.of(context).push(MaterialPageRoute<void>(
       fullscreenDialog: true,
       builder: (BuildContext context) {
@@ -21,11 +22,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           appBar: AppBar(
             backgroundColor: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
             elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
+            automaticallyImplyLeading: false,
             title: Text('Settings', style: TextStyle(fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black)),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
           ),
           body: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -43,40 +47,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Dark Mode', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
-                      Switch(
-                        value: isDark,
-                        onChanged: (val) {
-                          // TODO: Implement theme switching logic
+                      const Text('Dark Mode', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      GestureDetector(
+                        onTap: () {
+                          context.read<ThemeProvider>().toggleTheme();
                         },
-                        activeThumbColor: AppColors.primary,
+                        child: Container(
+                          width: 48,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.primary : AppColors.borderLight,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Stack(
+                            children: [
+                              AnimatedPositioned(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeInOut,
+                                left: isDark ? 26 : 2,
+                                top: 2,
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: isDark ? AppColors.surfaceDark : Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
-                Text('ACCOUNT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () {
-                    // TODO: Implement logout
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.error, width: 2),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Log Out', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.error)),
-                        const Icon(Icons.arrow_forward, color: AppColors.error, size: 20),
-                      ],
+                if (isLoggedIn) ...[
+                  const SizedBox(height: 32),
+                  Text('ACCOUNT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () async {
+                      await context.read<AuthRepository>().logout();
+                      if (context.mounted) Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.error, width: 2),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Log Out', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.error)),
+                          const Icon(Icons.arrow_forward, color: AppColors.error, size: 20),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -88,11 +119,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isLoggedIn = context.watch<AuthRepository>().isAuthenticated;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: false,
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        elevation: 0,
         actions: [
           IconButton(
             icon: Container(
@@ -104,12 +139,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: const Icon(Icons.settings, size: 20),
             ),
-            onPressed: () => _showSettingsModal(context, isDark),
+            onPressed: () => _showSettingsModal(context, isDark, isLoggedIn),
           ),
           const SizedBox(width: 8),
         ],
       ),
-      body: _isLoggedIn ? _buildLoggedInState(isDark) : _buildLoggedOutState(isDark),
+      body: isLoggedIn ? _buildLoggedInState(isDark) : _buildLoggedOutState(isDark),
     );
   }
 
@@ -146,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () => context.push('/register'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -161,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: () => context.push('/login'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: isDark ? Colors.white : Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),

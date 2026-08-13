@@ -135,16 +135,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
               // Floating Action Buttons (AppBar)
               SliverAppBar(
                 floating: true,
-                pinned: false,
-                backgroundColor: Colors.transparent,
+                pinned: true,
+                backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
                 elevation: 0,
+                scrolledUnderElevation: 0,
                 leading: IconButton(
                   icon: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: isDark ? AppColors.surfaceDark.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.8),
                       shape: BoxShape.circle,
-                      border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
                     ),
                     child: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black, size: 20),
                   ),
@@ -157,7 +157,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                       decoration: BoxDecoration(
                         color: isDark ? AppColors.surfaceDark.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.8),
                         shape: BoxShape.circle,
-                        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
                       ),
                       child: Text('🔖', style: TextStyle(fontSize: 16)),
                     ),
@@ -169,7 +168,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                       decoration: BoxDecoration(
                         color: isDark ? AppColors.surfaceDark.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.8),
                         shape: BoxShape.circle,
-                        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
                       ),
                       child: Text('⋯', style: TextStyle(fontSize: 16)),
                     ),
@@ -686,7 +684,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       child: Column(
         children: [
           _tabBar,
-          Divider(height: 1, color: _isDark ? AppColors.borderDark : AppColors.borderLight),
         ],
       ),
     );

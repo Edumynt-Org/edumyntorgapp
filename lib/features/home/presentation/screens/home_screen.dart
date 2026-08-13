@@ -38,9 +38,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
+      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text('Home', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: false,
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
