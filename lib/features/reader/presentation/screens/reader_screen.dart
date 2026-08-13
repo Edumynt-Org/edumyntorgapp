@@ -446,13 +446,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
+                        icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
                         onPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/');
-                          }
+                          context.go('/book/${widget.slug}');
                         },
                       ),
                       Expanded(
