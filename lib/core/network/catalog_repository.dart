@@ -175,7 +175,7 @@ class CatalogRepository {
           for (var ec in docs) {
             if (ec['chapter'] is Map) {
               allItems.add(TocItemModel(
-                id: ec['chapter']['id'],
+                id: ec['chapter']['slug'] ?? ec['chapter']['id'],
                 title: ec['chapter']['title'],
                 type: 'chapter',
                 sortOrder: ec['sort_order'] ?? 0,
@@ -199,7 +199,7 @@ class CatalogRepository {
                 for (var pc in pcDocs) {
                   if (pc['chapter'] is Map) {
                     partChapters.add(TocItemModel(
-                      id: pc['chapter']['id'],
+                      id: pc['chapter']['slug'] ?? pc['chapter']['id'],
                       title: pc['chapter']['title'],
                       type: 'chapter',
                       sortOrder: pc['sort_order'] ?? 0,
@@ -219,7 +219,7 @@ class CatalogRepository {
         }
 
         allItems.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-        textEditionStructures[ed.id] = allItems;
+        textEditionStructures[ed.slug] = allItems;
       }
 
       // 7. Build Audio Edition Structures
@@ -234,7 +234,7 @@ class CatalogRepository {
           for (var ec in docs) {
             if (ec['audio_chapter'] is Map) {
               allItems.add(TocItemModel(
-                id: ec['audio_chapter']['id'],
+                id: ec['audio_chapter']['slug'] ?? ec['audio_chapter']['id'],
                 title: ec['audio_chapter']['title'],
                 type: 'chapter',
                 sortOrder: ec['sort_order'] ?? 0,
@@ -257,7 +257,7 @@ class CatalogRepository {
                 for (var pc in pcDocs) {
                   if (pc['audio_chapter'] is Map) {
                     partChapters.add(TocItemModel(
-                      id: pc['audio_chapter']['id'],
+                      id: pc['audio_chapter']['slug'] ?? pc['audio_chapter']['id'],
                       title: pc['audio_chapter']['title'],
                       type: 'chapter',
                       sortOrder: pc['sort_order'] ?? 0,
@@ -277,7 +277,7 @@ class CatalogRepository {
         }
 
         allItems.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-        audioEditionStructures[ed.id] = allItems;
+        audioEditionStructures[ed.slug] = allItems;
       }
 
       // 8. Fetch Narrators
@@ -287,7 +287,7 @@ class CatalogRepository {
         if (nResp.statusCode == 200) {
           final docs = jsonDecode(nResp.body)['docs'] as List;
           if (docs.isNotEmpty && docs[0]['person'] is Map) {
-            audioNarrators[ed.id] = docs[0]['person']['name'];
+            audioNarrators[ed.slug] = docs[0]['person']['name'];
           }
         }
       }
@@ -303,7 +303,52 @@ class CatalogRepository {
         audioNarrators: audioNarrators,
       );
     } catch (e) {
-      debugPrint('Error fetching book details: $e');
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getChapterContent(String chapterSlug) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/chapters?where[slug][equals]=$chapterSlug&depth=0&limit=1'),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final docs = data['docs'] as List;
+        if (docs.isNotEmpty) {
+          final chapter = docs[0];
+          
+          // Extract text from Lexical
+          String extractText(dynamic node) {
+            if (node == null) return '';
+            if (node['text'] != null) return node['text'];
+            if (node['children'] is List) {
+              String result = '';
+              for (var child in node['children']) {
+                result += extractText(child);
+              }
+              if (node['type'] == 'paragraph') result += '\n\n';
+              return result;
+            }
+            return '';
+          }
+          
+          String contentText = 'No content found.';
+          if (chapter['content'] != null && chapter['content']['root'] != null) {
+            contentText = extractText(chapter['content']['root']);
+          }
+
+          return {
+            'id': chapter['id'],
+            'title': chapter['title'],
+            'slug': chapter['slug'],
+            'content': contentText,
+          };
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching chapter: $e');
       return null;
     }
   }

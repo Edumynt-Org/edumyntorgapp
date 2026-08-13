@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/network/catalog_repository.dart';
 import '../../../../core/network/catalog_models.dart';
@@ -45,8 +46,12 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
       
       setState(() {
         _bundle = bundle;
-        _selectedTextEditionId = bundle.textEditions.isNotEmpty ? bundle.textEditions.first.id : null;
-        _selectedAudioEditionId = bundle.audioEditions.isNotEmpty ? bundle.audioEditions.first.id : null;
+        if (bundle.textEditions.isNotEmpty) {
+          _selectedTextEditionId = bundle.textEditions.first.slug;
+        }
+        if (bundle.audioEditions.isNotEmpty) {
+          _selectedAudioEditionId = bundle.audioEditions.first.slug;
+        }
         _isLoading = false;
       });
     } else if (mounted) {
@@ -350,14 +355,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
               _buildEditionSwitcher(
                 _bundle!.textEditions,
                 _selectedTextEditionId!,
-                (id) => setState(() => _selectedTextEditionId = id),
+                (slug) => setState(() => _selectedTextEditionId = slug),
                 isDark,
               ),
               TocAccordionWidget(items: structures, isDark: isDark),
             ],
           ),
         ),
-        _buildStickyCTA('Start Reading', AppColors.primary, isDark),
+        _buildStickyCTA('Start Reading', AppColors.primary, isDark, _selectedTextEditionId),
       ],
     );
   }
@@ -374,7 +379,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
               _buildEditionSwitcher(
                 _bundle!.audioEditions,
                 _selectedAudioEditionId!,
-                (id) => setState(() => _selectedAudioEditionId = id),
+                (slug) => setState(() => _selectedAudioEditionId = slug),
                 isDark,
               ),
               if (narrator != null) ...[
@@ -385,7 +390,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
             ],
           ),
         ),
-        _buildStickyCTA('Start Listening', AppColors.secondary, isDark),
+        _buildStickyCTA('Start Listening', AppColors.secondary, isDark, _selectedAudioEditionId),
       ],
     );
   }
@@ -502,14 +507,28 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
     );
   }
 
-  Widget _buildStickyCTA(String text, Color color, bool isDark) {
+  Widget _buildStickyCTA(String text, Color color, bool isDark, String? editionId) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       child: Material(
         color: color,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            if (editionId != null) {
+              final toc = _bundle!.textEditionStructures[editionId] ?? _bundle!.audioEditionStructures[editionId];
+              String firstChapter = 'c1';
+              if (toc != null && toc.isNotEmpty) {
+                final firstItem = toc.first;
+                if (firstItem.type == 'chapter') {
+                  firstChapter = firstItem.id;
+                } else if (firstItem.chapters != null && firstItem.chapters!.isNotEmpty) {
+                  firstChapter = firstItem.chapters!.first.id;
+                }
+              }
+              context.push('/book/${widget.slug}/$editionId/$firstChapter');
+            }
+          },
           borderRadius: BorderRadius.circular(12),
           child: Container(
             width: double.infinity,

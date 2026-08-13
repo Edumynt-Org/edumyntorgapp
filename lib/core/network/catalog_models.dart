@@ -90,6 +90,7 @@ class BookListModel {
 
 class EditionModel {
   final String id;
+  final String slug;
   final String title;
   final bool isAudio;
   final String? sourceName;
@@ -97,6 +98,7 @@ class EditionModel {
 
   EditionModel({
     required this.id,
+    required this.slug,
     required this.title,
     this.isAudio = false,
     this.sourceName,
@@ -106,6 +108,7 @@ class EditionModel {
   factory EditionModel.fromJson(Map<String, dynamic> json, {bool isAudio = false}) {
     return EditionModel(
       id: json['id'],
+      slug: json['slug'] ?? json['id'], // fallback
       title: json['title'],
       isAudio: isAudio,
       sourceName: json['source_name'],
