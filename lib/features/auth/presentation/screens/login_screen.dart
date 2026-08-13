@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/network/auth_repository.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/custom_button.dart';
@@ -157,7 +158,11 @@ class _LoginScreenState extends State<LoginScreen> {
               CustomButton(
                 text: 'Skip for now',
                 isGhost: true,
-                onPressed: () => context.go('/home'),
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('skipped_login', true);
+                  if (context.mounted) context.go('/home');
+                },
               ),
             ],
           ),

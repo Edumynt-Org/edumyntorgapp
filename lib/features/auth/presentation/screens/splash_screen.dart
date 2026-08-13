@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/network/auth_repository.dart';
 import '../../../../core/theme/app_colors.dart';
 
@@ -28,7 +29,13 @@ class _SplashScreenState extends State<SplashScreen> {
     if (authRepo.isAuthenticated) {
       context.go('/home');
     } else {
-      context.go('/login');
+      final prefs = await SharedPreferences.getInstance();
+      final skippedLogin = prefs.getBool('skipped_login') ?? false;
+      if (skippedLogin) {
+        context.go('/home');
+      } else {
+        context.go('/login');
+      }
     }
   }
 

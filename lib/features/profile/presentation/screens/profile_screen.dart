@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/network/auth_repository.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -89,6 +90,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   GestureDetector(
                     onTap: () async {
                       await context.read<AuthRepository>().logout();
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.remove('skipped_login');
                       if (context.mounted) Navigator.pop(context);
                     },
                     child: Container(
