@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "org.edumynt.edumyntorgapp"
+    namespace = "org.edumynt"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "org.edumynt.edumyntorgapp"
+        applicationId = "org.edumynt"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
