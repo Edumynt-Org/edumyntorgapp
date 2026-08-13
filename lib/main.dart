@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/network/auth_repository.dart';
+import 'core/network/catalog_repository.dart';
 import 'core/theme/app_theme.dart';
 import 'router/app_router.dart';
 
@@ -14,6 +15,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthRepository(prefs)),
+        Provider(create: (_) => CatalogRepository()),
       ],
       child: const MyApp(),
     ),

@@ -19,8 +19,8 @@ void main() {
     expect(textFinder, findsOneWidget);
 
     final Text textWidget = tester.widget(textFinder);
-    print('Text color: ${textWidget.style?.color}');
-    print('Text fontSize: ${textWidget.style?.fontSize}');
-    print('Text fontWeight: ${textWidget.style?.fontWeight}');
+    debugPrint('Text color: ${textWidget.style?.color}');
+    debugPrint('Text fontSize: ${textWidget.style?.fontSize}');
+    debugPrint('Text fontWeight: ${textWidget.style?.fontWeight}');
   });
 }
