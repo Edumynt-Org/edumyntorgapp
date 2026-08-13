@@ -7,6 +7,7 @@ import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/books/presentation/screens/books_screen.dart';
 import '../features/books/presentation/screens/book_detail_screen.dart';
+import '../features/profile/presentation/screens/profile_screen.dart';
 import '../core/widgets/scaffold_with_nav.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -66,7 +67,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/profile',
-              builder: (context, state) => const Scaffold(body: Center(child: Text('Profile'))),
+              builder: (context, state) => const ProfileScreen(),
             ),
           ],
         ),

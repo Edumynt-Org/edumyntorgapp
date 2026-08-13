@@ -64,72 +64,47 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
 
   void _showDescriptionModal(BuildContext context, bool isDark) {
     if (_bundle == null) return;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.8,
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+    Navigator.of(context).push(MaterialPageRoute<void>(
+      fullscreenDialog: true,
+      builder: (BuildContext context) {
+        return Scaffold(
+          backgroundColor: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
+          appBar: AppBar(
+            backgroundColor: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text('About this book', style: TextStyle(fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black)),
           ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('About this book', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black)),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.backgroundDark : AppColors.surfaceLight,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.close, size: 20, color: isDark ? Colors.white : Colors.black),
-                      ),
-                    ),
-                  ],
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _bundle!.book.title,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black),
                 ),
-              ),
-              Divider(height: 1, color: isDark ? AppColors.borderDark : AppColors.borderLight),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _bundle!.book.title,
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black),
-                      ),
-                      if (_bundle!.authors.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          'by ${_bundle!.authors.join(', ')}',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      Text(
-                        _bundle!.book.description ?? '',
-                        style: TextStyle(fontSize: 16, height: 1.6, color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87),
-                      ),
-                    ],
+                if (_bundle!.authors.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'by ${_bundle!.authors.join(', ')}',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
                   ),
+                ],
+                const SizedBox(height: 24),
+                Text(
+                  _bundle!.book.description ?? '',
+                  style: TextStyle(fontSize: 16, height: 1.6, color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
-    );
+    ));
   }
 
   @override
@@ -532,10 +507,6 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
   Widget _buildStickyCTA(String text, Color color, bool isDark) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-        border: Border(top: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight)),
-      ),
       child: Material(
         color: color,
         borderRadius: BorderRadius.circular(12),
