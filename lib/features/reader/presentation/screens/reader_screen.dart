@@ -83,11 +83,16 @@ class _ReaderScreenState extends State<ReaderScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             final themeProvider = context.read<ThemeProvider>();
-            final currentIsDark = themeProvider.isDarkMode;
-            
+            final theme = Theme.of(context);
+            final colorScheme = theme.colorScheme;
+            final onSurface = colorScheme.onSurface;
+            final onSurfaceMuted = onSurface.withValues(alpha: 0.54);
+            final borderColor = theme.dividerTheme.color ?? colorScheme.outline;
+
             return Container(
               height: MediaQuery.of(context).size.height, // Full screen
               padding: const EdgeInsets.only(top: 48), // Space for status bar
+              color: theme.scaffoldBackgroundColor,
               child: Column(
                 children: [
                   Padding(
@@ -95,9 +100,9 @@ class _ReaderScreenState extends State<ReaderScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Display Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: currentIsDark ? Colors.white : Colors.black)),
+                        Text('Display Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: onSurface)),
                         IconButton(
-                          icon: Icon(Icons.close, color: currentIsDark ? Colors.white : Colors.black),
+                          icon: Icon(Icons.close, color: onSurface),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ],
@@ -112,7 +117,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Font Size
-                          Text('FONT SIZE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: currentIsDark ? Colors.white54 : Colors.black54)),
+                          Text('FONT SIZE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: onSurfaceMuted)),
                           const SizedBox(height: 16),
                           Row(
                             children: [
@@ -123,8 +128,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                     setModalState(() {});
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: currentIsDark ? AppColors.surfaceDark : Colors.grey.shade200,
-                                    foregroundColor: currentIsDark ? Colors.white : Colors.black,
+                                    backgroundColor: colorScheme.surface,
+                                    foregroundColor: onSurface,
                                     elevation: 0,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
@@ -132,7 +137,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              Text('${_fontSize.toInt()}px', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: currentIsDark ? Colors.white : Colors.black)),
+                              Text('${_fontSize.toInt()}px', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: onSurface)),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: ElevatedButton(
@@ -141,8 +146,8 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                     setModalState(() {});
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: currentIsDark ? AppColors.surfaceDark : Colors.grey.shade200,
-                                    foregroundColor: currentIsDark ? Colors.white : Colors.black,
+                                    backgroundColor: colorScheme.surface,
+                                    foregroundColor: onSurface,
                                     elevation: 0,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
@@ -155,7 +160,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                           const SizedBox(height: 32),
                           
                           // Font Family
-                          Text('FONT STYLE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: currentIsDark ? Colors.white54 : Colors.black54)),
+                          Text('FONT STYLE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: onSurfaceMuted)),
                           const SizedBox(height: 16),
                           Row(
                             children: [
@@ -166,11 +171,11 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                     setModalState(() {});
                                   },
                                   style: OutlinedButton.styleFrom(
-                                    side: BorderSide(color: _fontFamily == 'PlusJakartaSans' ? AppColors.primary : (currentIsDark ? AppColors.borderDark : AppColors.borderLight)),
-                                    backgroundColor: _fontFamily == 'PlusJakartaSans' ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+                                    side: BorderSide(color: _fontFamily == 'PlusJakartaSans' ? colorScheme.primary : borderColor),
+                                    backgroundColor: _fontFamily == 'PlusJakartaSans' ? colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
-                                  child: Text('Sans Serif', style: TextStyle(fontFamily: 'PlusJakartaSans', color: currentIsDark ? Colors.white : Colors.black)),
+                                  child: Text('Sans Serif', style: TextStyle(fontFamily: 'PlusJakartaSans', color: onSurface)),
                                 ),
                               ),
                               const SizedBox(width: 16),
@@ -181,11 +186,11 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                     setModalState(() {});
                                   },
                                   style: OutlinedButton.styleFrom(
-                                    side: BorderSide(color: _fontFamily == 'Georgia' ? AppColors.primary : (currentIsDark ? AppColors.borderDark : AppColors.borderLight)),
-                                    backgroundColor: _fontFamily == 'Georgia' ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+                                    side: BorderSide(color: _fontFamily == 'Georgia' ? colorScheme.primary : borderColor),
+                                    backgroundColor: _fontFamily == 'Georgia' ? colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
-                                  child: Text('Serif', style: TextStyle(fontFamily: 'Georgia', color: currentIsDark ? Colors.white : Colors.black)),
+                                  child: Text('Serif', style: TextStyle(fontFamily: 'Georgia', color: onSurface)),
                                 ),
                               ),
                             ],
@@ -194,37 +199,37 @@ class _ReaderScreenState extends State<ReaderScreen> {
                           const SizedBox(height: 32),
                           
                           // Theme Toggle
-                          Text('THEME', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: currentIsDark ? Colors.white54 : Colors.black54)),
+                          Text('THEME', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: onSurfaceMuted)),
                           const SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () {
-                                    if (currentIsDark) themeProvider.toggleTheme();
+                                    if (themeProvider.isDarkMode) themeProvider.toggleTheme();
                                     setModalState(() {});
                                   },
                                   style: OutlinedButton.styleFrom(
-                                    side: BorderSide(color: !currentIsDark ? AppColors.primary : AppColors.borderDark),
-                                    backgroundColor: !currentIsDark ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+                                    side: BorderSide(color: !themeProvider.isDarkMode ? colorScheme.primary : borderColor),
+                                    backgroundColor: !themeProvider.isDarkMode ? colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
-                                  child: Text('Light', style: TextStyle(color: currentIsDark ? Colors.white : Colors.black)),
+                                  child: Text('Light', style: TextStyle(color: onSurface)),
                                 ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () {
-                                    if (!currentIsDark) themeProvider.toggleTheme();
+                                    if (!themeProvider.isDarkMode) themeProvider.toggleTheme();
                                     setModalState(() {});
                                   },
                                   style: OutlinedButton.styleFrom(
-                                    side: BorderSide(color: currentIsDark ? AppColors.primary : AppColors.borderLight),
-                                    backgroundColor: currentIsDark ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+                                    side: BorderSide(color: themeProvider.isDarkMode ? colorScheme.primary : borderColor),
+                                    backgroundColor: themeProvider.isDarkMode ? colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
-                                  child: Text('Dark', style: TextStyle(color: currentIsDark ? Colors.white : Colors.black)),
+                                  child: Text('Dark', style: TextStyle(color: onSurface)),
                                 ),
                               ),
                             ],
@@ -233,14 +238,14 @@ class _ReaderScreenState extends State<ReaderScreen> {
                           const SizedBox(height: 48),
 
                           // Live Preview at bottom
-                          Text('PREVIEW', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: currentIsDark ? Colors.white54 : Colors.black54)),
+                          Text('PREVIEW', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: onSurfaceMuted)),
                           const SizedBox(height: 16),
                           Container(
                             padding: const EdgeInsets.all(16),
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: currentIsDark ? AppColors.surfaceDark : Colors.white,
-                              border: Border.all(color: currentIsDark ? AppColors.borderDark : AppColors.borderLight),
+                              color: colorScheme.surface,
+                              border: Border.all(color: borderColor),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
@@ -249,7 +254,29 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                 fontFamily: _fontFamily,
                                 fontSize: _fontSize,
                                 height: 1.8,
-                                color: currentIsDark ? Colors.white : Colors.black,
+                                color: onSurface,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 48),
+
+                          // Reset to Default
+                          Center(
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _fontSize = 18.0;
+                                  _fontFamily = 'PlusJakartaSans';
+                                });
+                                setModalState(() {});
+                              },
+                              child: Text(
+                                'Reset to Default',
+                                style: TextStyle(
+                                  color: onSurfaceMuted,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
                             ),
                           ),
