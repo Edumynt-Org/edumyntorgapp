@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../core/network/auth_repository.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/app_button.dart';
@@ -17,6 +19,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
   bool _isSuccess = false;
+  Timer? _resendTimer;
+  int _resendSeconds = 60;
+
+  @override
+  void dispose() {
+    _resendTimer?.cancel();
+    _emailController.dispose();
+    super.dispose();
+  }
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -32,6 +43,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  void _startResendTimer() {
+    setState(() => _resendSeconds = 60);
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_resendSeconds > 0) {
+        setState(() => _resendSeconds--);
+      } else {
+        timer.cancel();
+      }
+    });
   }
 
   Future<void> _submit() async {
@@ -54,7 +81,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (error != null) {
       _showError(error);
     } else {
-      setState(() => _isSuccess = true);
+      setState(() {
+        _isSuccess = true;
+      });
+      _startResendTimer();
     }
   }
 
@@ -64,10 +94,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
+        leading: _isSuccess
+            ? null
+            : IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => context.pop(),
+              ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -75,48 +107,73 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Reset Password',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+              if (!_isSuccess) ...[
+                Center(
+                  child: Lottie.asset(
+                    'assets/animations/forgot_password.lottie',
+                    width: 240,
+                    height: 240,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.lock_reset,
+                        size: 80,
+                        color: Theme.of(context).colorScheme.primary,
+                      );
+                    },
+                  ),
                 ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                _isSuccess
-                    ? "We've sent you an email with instructions."
-                    : "Enter your email and we'll send you a link to reset your password.",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textMutedLight,
+                SizedBox(height: 24),
+                Text(
+                  'Reset Password',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              SizedBox(height: 48),
+                SizedBox(height: 8),
+                Text(
+                  "Enter your email and we'll send you a link to reset your password.",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textMutedLight,
+                  ),
+                ),
+                SizedBox(height: 48),
+              ],
 
               if (_isSuccess) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Column(
                     children: [
-                      Container(
-                        height: 64,
-                        width: 64,
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.check_circle_outline,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 40,
-                        ),
+                      Lottie.asset(
+                        'assets/animations/success.lottie',
+                        width: 240,
+                        height: 240,
+                        repeat: false,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Fallback until the asset is provided
+                          return Container(
+                            height: 120,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check_circle_outline,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 80,
+                            ),
+                          );
+                        },
                       ),
                       SizedBox(height: 16),
                       Text(
                         'Check your inbox',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -124,13 +181,35 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       Text(
                         'Click the link in the email we just sent to reset your password. You can safely go back to login.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.textMutedLight),
+                        style: TextStyle(
+                          color: AppColors.textMutedLight,
+                          fontSize: 16,
+                        ),
                       ),
                       SizedBox(height: 32),
                       AppButton(
                         text: 'Back to Login',
-                        isSecondary: true,
                         onPressed: () => context.pop(),
+                      ),
+                      SizedBox(height: 16),
+                      TextButton(
+                        onPressed: _resendSeconds > 0
+                            ? null
+                            : () {
+                                _startResendTimer();
+                                // Call resend API if needed
+                              },
+                        child: Text(
+                          _resendSeconds > 0
+                              ? 'Resend Email in ${_resendSeconds}s'
+                              : 'Resend Email',
+                          style: TextStyle(
+                            color: _resendSeconds > 0
+                                ? AppColors.textMutedLight
+                                : Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
