@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:edumyntorgapp/features/auth/presentation/widgets/custom_button.dart';
+import 'package:edumyntorgapp/features/auth/presentation/widgets/app_button.dart';
 
 void main() {
-  testWidgets('CustomButton rendering', (WidgetTester tester) async {
+  testWidgets('AppButton shows loading state', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: CustomButton(
-            text: 'Log In',
+          body: AppButton(
+            text: 'Test',
+            isLoading: true,
             onPressed: () {},
           ),
         ),

@@ -17,7 +17,7 @@ class _BooksScreenState extends State<BooksScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
   bool _isSearchExpanded = false;
-  
+
   bool _isLoading = true;
   List<BookModel> _books = [];
 
@@ -43,10 +43,10 @@ class _BooksScreenState extends State<BooksScreen> {
 
   Future<void> _search(String query) async {
     setState(() => _isLoading = true);
-    
+
     final repo = Provider.of<CatalogRepository>(context, listen: false);
     final results = await repo.searchBooks(query);
-    
+
     if (mounted) {
       setState(() {
         _books = results;
@@ -60,20 +60,31 @@ class _BooksScreenState extends State<BooksScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: isDark
+            ? AppColors.backgroundDark
+            : AppColors.backgroundLight,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: _isSearchExpanded 
+        title: _isSearchExpanded
             ? TextField(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
                 autofocus: true,
-                style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search...',
-                  hintStyle: TextStyle(color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
+                  hintStyle: TextStyle(
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
+                  ),
                   border: InputBorder.none,
                 ),
               )
@@ -81,7 +92,10 @@ class _BooksScreenState extends State<BooksScreen> {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: Icon(_isSearchExpanded ? Icons.close : Icons.search, color: isDark ? Colors.white : Colors.black),
+            icon: Icon(
+              _isSearchExpanded ? Icons.close : Icons.search,
+              color: isDark ? Colors.white : Colors.black,
+            ),
             onPressed: () {
               setState(() {
                 _isSearchExpanded = !_isSearchExpanded;
@@ -103,15 +117,13 @@ class _BooksScreenState extends State<BooksScreen> {
             child: _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : _books.isEmpty
-                    ? _buildEmptyState(isDark)
-                    : _buildGrid(isDark),
+                ? _buildEmptyState(isDark)
+                : _buildGrid(isDark),
           ),
         ],
       ),
     );
   }
-
-
 
   Widget _buildFilterChips(bool isDark) {
     return SizedBox(
@@ -136,11 +148,15 @@ class _BooksScreenState extends State<BooksScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
+        color: isSelected
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+            : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5) : (isDark ? AppColors.borderDark : AppColors.borderLight), 
-          width: 2
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
+              : (isDark ? AppColors.borderDark : AppColors.borderLight),
+          width: 2,
         ),
       ),
       child: Center(
@@ -148,7 +164,9 @@ class _BooksScreenState extends State<BooksScreen> {
           label,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isSelected ? Theme.of(context).colorScheme.primary : (isDark ? Colors.white : Colors.black),
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : (isDark ? Colors.white : Colors.black),
           ),
         ),
       ),
@@ -162,9 +180,24 @@ class _BooksScreenState extends State<BooksScreen> {
         children: [
           Text('🤷‍♂️', style: TextStyle(fontSize: 64)),
           SizedBox(height: 16),
-          Text('No books found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black)),
+          Text(
+            'No books found',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+          ),
           SizedBox(height: 8),
-          Text('Try searching for something else.', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
+          Text(
+            'Try searching for something else.',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isDark
+                  ? AppColors.textMutedDark
+                  : AppColors.textMutedLight,
+            ),
+          ),
         ],
       ),
     );
@@ -193,75 +226,95 @@ class _BooksScreenState extends State<BooksScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight, width: 2),
-            ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: book.coverUrl != null && book.coverUrl!.isNotEmpty
-                      ? Image.network(
-                          book.coverUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(book.title),
-                        )
-                      : _buildPlaceholder(book.title),
-                  ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.surfaceDark
+                    : AppColors.backgroundLight,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                  width: 2,
                 ),
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.surfaceDark.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.9),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight, width: 2),
-                        ),
-                        child: Text('🎧', style: TextStyle(fontSize: 10)),
-                      ),
-                      SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.surfaceDark.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.9),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight, width: 2),
-                        ),
-                        child: Text('📖', style: TextStyle(fontSize: 10)),
-                      ),
-                    ],
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                          ? Image.network(
+                              book.coverUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  _buildPlaceholder(book.title),
+                            )
+                          : _buildPlaceholder(book.title),
+                    ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.surfaceDark.withValues(alpha: 0.9)
+                                : Colors.white.withValues(alpha: 0.9),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.borderDark
+                                  : AppColors.borderLight,
+                              width: 2,
+                            ),
+                          ),
+                          child: Text('🎧', style: TextStyle(fontSize: 10)),
+                        ),
+                        SizedBox(width: 4),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.surfaceDark.withValues(alpha: 0.9)
+                                : Colors.white.withValues(alpha: 0.9),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.borderDark
+                                  : AppColors.borderLight,
+                              width: 2,
+                            ),
+                          ),
+                          child: Text('📖', style: TextStyle(fontSize: 10)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        SizedBox(height: 12),
-        Text(
-          book.title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black,
-            height: 1.2,
+          SizedBox(height: 12),
+          Text(
+            book.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : Colors.black,
+              height: 1.2,
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildPlaceholder(String title) {
     return Container(

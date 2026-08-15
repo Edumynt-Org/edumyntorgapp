@@ -6,7 +6,7 @@ import 'api_config.dart';
 
 class AuthRepository extends ChangeNotifier {
   final SharedPreferences _prefs;
-  
+
   // Base URL specifically for the Users collection endpoints
   String get _baseUrl => '${ApiConfig.baseUrl}/api/users';
 
@@ -55,7 +55,7 @@ class AuthRepository extends ChangeNotifier {
       if (data['errors'] != null && data['errors'].isNotEmpty) {
         return data['errors'][0]['message'];
       }
-      
+
       return 'Invalid credentials';
     } catch (e) {
       return 'Network error. Please try again.';
@@ -68,11 +68,7 @@ class AuthRepository extends ChangeNotifier {
       final response = await http.post(
         Uri.parse(_baseUrl),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name': name,
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode({'name': name, 'email': email, 'password': password}),
       );
 
       final data = jsonDecode(response.body);
@@ -86,7 +82,7 @@ class AuthRepository extends ChangeNotifier {
       if (data['errors'] != null && data['errors'].isNotEmpty) {
         return data['errors'][0]['message'];
       }
-      
+
       return 'Registration failed';
     } catch (e) {
       return 'Network error. Please try again.';
@@ -104,7 +100,7 @@ class AuthRepository extends ChangeNotifier {
       if (response.statusCode == 200) {
         return null;
       }
-      
+
       final data = jsonDecode(response.body);
       if (data['errors'] != null && data['errors'].isNotEmpty) {
         return data['errors'][0]['message'];

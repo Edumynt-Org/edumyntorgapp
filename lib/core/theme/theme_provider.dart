@@ -11,7 +11,7 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   ThemeMode get themeMode => _themeMode;
-  
+
   bool get isDarkMode {
     if (_themeMode == ThemeMode.system) {
       return PlatformDispatcher.instance.platformBrightness == Brightness.dark;
@@ -40,7 +40,8 @@ class ThemeProvider extends ChangeNotifier {
       await _prefs.setString('theme_mode', 'dark');
     } else {
       // If system, toggle to opposite of what system currently is
-      final isCurrentlyDark = PlatformDispatcher.instance.platformBrightness == Brightness.dark;
+      final isCurrentlyDark =
+          PlatformDispatcher.instance.platformBrightness == Brightness.dark;
       if (isCurrentlyDark) {
         _themeMode = ThemeMode.light;
         await _prefs.setString('theme_mode', 'light');

@@ -12,22 +12,22 @@ import '../features/reader/presentation/screens/reader_screen.dart';
 import '../core/widgets/scaffold_with_nav.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
-final _shellNavigatorBooksKey = GlobalKey<NavigatorState>(debugLabel: 'shellBooks');
-final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
+final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(
+  debugLabel: 'shellHome',
+);
+final _shellNavigatorBooksKey = GlobalKey<NavigatorState>(
+  debugLabel: 'shellBooks',
+);
+final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(
+  debugLabel: 'shellProfile',
+);
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/',
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
+    GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
@@ -38,7 +38,8 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/book/:slug',
-      builder: (context, state) => BookDetailScreen(slug: state.pathParameters['slug']!),
+      builder: (context, state) =>
+          BookDetailScreen(slug: state.pathParameters['slug']!),
     ),
     GoRoute(
       path: '/book/:slug/:editionSlug/:chapterSlug',

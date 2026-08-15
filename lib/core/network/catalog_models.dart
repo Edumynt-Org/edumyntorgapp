@@ -3,7 +3,7 @@ class BookModel {
   final String title;
   final String slug;
   final String? coverUrl;
-  
+
   // Extended fields for detail view
   final String? description;
   final int? firstPublishedYear;
@@ -23,8 +23,8 @@ class BookModel {
     String? cUrl;
     if (json['cover'] != null && json['cover'] is Map) {
       final coverData = json['cover'];
-      if (coverData['sizes'] != null && 
-          coverData['sizes']['cover_medium'] != null && 
+      if (coverData['sizes'] != null &&
+          coverData['sizes']['cover_medium'] != null &&
           coverData['sizes']['cover_medium']['url'] != null) {
         cUrl = coverData['sizes']['cover_medium']['url'];
       } else {
@@ -52,7 +52,7 @@ class BookModel {
         descText = paragraphs.join('\n\n');
       }
     }
-    
+
     return BookModel(
       id: json['id'],
       title: json['title'],
@@ -60,7 +60,9 @@ class BookModel {
       coverUrl: cUrl,
       description: descText,
       firstPublishedYear: json['first_published_year'],
-      originalLanguage: json['original_language'] is Map ? json['original_language']['name'] : null,
+      originalLanguage: json['original_language'] is Map
+          ? json['original_language']['name']
+          : null,
     );
   }
 }
@@ -78,7 +80,10 @@ class BookListModel {
     this.books = const [],
   });
 
-  factory BookListModel.fromJson(Map<String, dynamic> json, List<BookModel> books) {
+  factory BookListModel.fromJson(
+    Map<String, dynamic> json,
+    List<BookModel> books,
+  ) {
     return BookListModel(
       id: json['id'],
       title: json['title'],
@@ -105,7 +110,10 @@ class EditionModel {
     this.rightsStatus,
   });
 
-  factory EditionModel.fromJson(Map<String, dynamic> json, {bool isAudio = false}) {
+  factory EditionModel.fromJson(
+    Map<String, dynamic> json, {
+    bool isAudio = false,
+  }) {
     return EditionModel(
       id: json['id'],
       slug: json['slug'] ?? json['id'], // fallback

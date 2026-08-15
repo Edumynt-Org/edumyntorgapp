@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/network/auth_repository.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../widgets/custom_button.dart';
-import '../widgets/custom_text_field.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -71,63 +71,47 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               SizedBox(height: 32),
               Text(
-                'Edumynt Org',
-                style: TextStyle(
-                  fontSize: 32,
+                'Welcome Back',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 8),
               Text(
                 'Enter your email and password to log in to your account.',
-                style: TextStyle(
-                  fontSize: 16,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.textMutedLight,
                 ),
               ),
               SizedBox(height: 48),
-              CustomTextField(
+              AppTextField(
                 label: 'Email',
                 hintText: 'you@example.com',
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Password',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  TextButton(
-                    onPressed: () => context.push('/forgot-password'),
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      'Forgot password?',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              TextFormField(
+              AppTextField(
+                label: 'Password',
+                hintText: '••••••••',
                 controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  hintText: '••••••••',
+                isPassword: true,
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => context.push('/forgot-password'),
+                  child: Text(
+                    'Forgot password?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(height: 32),
-              CustomButton(
+              AppButton(
                 text: 'Log In',
                 isLoading: _isLoading,
                 onPressed: _login,
@@ -155,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 48),
               const Divider(),
               SizedBox(height: 16),
-              CustomButton(
+              AppButton(
                 text: 'Skip for now',
                 isGhost: true,
                 onPressed: () async {

@@ -13,7 +13,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _radiusAnimation;
   late Animation<Offset> _edumyntSlideAnimation;
@@ -27,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(milliseconds: 3000), // 3 seconds total animation
     );
-    
+
     // Circle Reveal (0% to 40% -> 1.2s)
     _radiusAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -37,20 +38,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     // EDUMYNT slides from left (40% to 80% -> 1.2s)
-    _edumyntSlideAnimation = Tween<Offset>(begin: const Offset(-1.5, 0.0), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.4, 0.8, curve: Curves.easeOutCubic),
-      ),
-    );
+    _edumyntSlideAnimation =
+        Tween<Offset>(begin: const Offset(-1.5, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.4, 0.8, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // LIBRARY slides from right (40% to 80% -> 1.2s)
-    _librarySlideAnimation = Tween<Offset>(begin: const Offset(1.5, 0.0), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.4, 0.8, curve: Curves.easeOutCubic),
-      ),
-    );
+    _librarySlideAnimation =
+        Tween<Offset>(begin: const Offset(1.5, 0.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.4, 0.8, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // Text fades in (40% to 80%)
     _textFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -72,12 +75,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _runSplashSequence() async {
     // 1. Play the entire animation forward (3 seconds)
     await _controller.forward();
-    
+
     // 2. Keep the completed logo on screen for some moments (1.5 seconds)
     await Future.delayed(const Duration(milliseconds: 1500));
-    
+
     if (!mounted) return;
-    
+
     final authRepo = Provider.of<AuthRepository>(context, listen: false);
     if (authRepo.isAuthenticated) {
       context.go('/home');
@@ -97,7 +100,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     // Calculate the maximum radius needed to cover the screen from the center.
-    final maxRadius = math.sqrt(math.pow(size.width / 2, 2) + math.pow(size.height / 2, 2));
+    final maxRadius = math.sqrt(
+      math.pow(size.width / 2, 2) + math.pow(size.height / 2, 2),
+    );
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -125,11 +130,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           opacity: _textFadeAnimation,
                           child: Text(
                             'EDUMYNT',
-                            style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 8.0,
-                            ),
+                            style: Theme.of(context).textTheme.displayMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 8.0,
+                                ),
                           ),
                         ),
                       ),
@@ -139,11 +145,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           opacity: _textFadeAnimation,
                           child: Text(
                             'LIBRARY',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w300,
-                              letterSpacing: 12.0,
-                            ),
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w300,
+                                  letterSpacing: 12.0,
+                                ),
                           ),
                         ),
                       ),
@@ -169,12 +176,8 @@ class _CircleRevealPainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-    
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      radius,
-      paint,
-    );
+
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), radius, paint);
   }
 
   @override

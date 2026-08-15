@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/network/auth_repository.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../widgets/custom_button.dart';
-import '../widgets/custom_text_field.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_text_field.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,7 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _isLoading = false;
   bool _isSuccess = false;
 
@@ -44,7 +44,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (name.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       _showError('Please fill in all fields.');
       return;
     }
@@ -86,24 +89,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               SizedBox(height: 16),
               Text(
-                'Edumynt Org',
-                style: TextStyle(
-                  fontSize: 32,
+                'Create an Account',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 8),
               Text(
-                _isSuccess 
-                  ? "We've sent you a verification email."
-                  : 'Join us to review books and save your progress.',
-                style: TextStyle(
-                  fontSize: 16,
+                _isSuccess
+                    ? "We've sent you a verification email."
+                    : 'Join us to review books and save your progress.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.textMutedLight,
                 ),
               ),
               SizedBox(height: 48),
-              
+
               if (_isSuccess) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 48),
@@ -113,15 +114,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         height: 64,
                         width: 64,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.check_circle_outline, color: Theme.of(context).colorScheme.primary, size: 40),
+                        child: Icon(
+                          Icons.check_circle_outline,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 40,
+                        ),
                       ),
                       SizedBox(height: 16),
                       Text(
                         'Check your inbox',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(height: 8),
                       Text(
@@ -130,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: TextStyle(color: AppColors.textMutedLight),
                       ),
                       SizedBox(height: 32),
-                      CustomButton(
+                      AppButton(
                         text: 'Go to Login',
                         isSecondary: true,
                         onPressed: () => context.pop(),
@@ -139,34 +149,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
               ] else ...[
-                CustomTextField(
+                AppTextField(
                   label: 'Full Name',
                   hintText: 'John Doe',
                   controller: _nameController,
                 ),
                 SizedBox(height: 24),
-                CustomTextField(
+                AppTextField(
                   label: 'Email',
                   hintText: 'you@example.com',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 SizedBox(height: 24),
-                CustomTextField(
+                AppTextField(
                   label: 'Password',
                   hintText: '••••••••',
                   controller: _passwordController,
-                  obscureText: true,
+                  isPassword: true,
                 ),
                 SizedBox(height: 24),
-                CustomTextField(
+                AppTextField(
                   label: 'Confirm Password',
                   hintText: '••••••••',
                   controller: _confirmPasswordController,
-                  obscureText: true,
+                  isPassword: true,
                 ),
                 SizedBox(height: 32),
-                CustomButton(
+                AppButton(
                   text: 'Create Account',
                   isLoading: _isLoading,
                   onPressed: _register,
@@ -194,7 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(height: 32),
                 const Divider(),
                 SizedBox(height: 16),
-                CustomButton(
+                AppButton(
                   text: 'Skip for now',
                   isGhost: true,
                   onPressed: () => context.go('/home'),
