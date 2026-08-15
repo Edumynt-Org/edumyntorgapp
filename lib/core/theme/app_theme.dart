@@ -3,21 +3,35 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
+  static TextTheme _buildTextTheme(TextTheme base, Color textColor) {
+    return GoogleFonts.interTextTheme(base).copyWith(
+      displayLarge: GoogleFonts.nunito(textStyle: base.displayLarge?.copyWith(color: textColor)),
+      displayMedium: GoogleFonts.nunito(textStyle: base.displayMedium?.copyWith(color: textColor)),
+      displaySmall: GoogleFonts.nunito(textStyle: base.displaySmall?.copyWith(color: textColor)),
+      headlineLarge: GoogleFonts.nunito(textStyle: base.headlineLarge?.copyWith(color: textColor)),
+      headlineMedium: GoogleFonts.nunito(textStyle: base.headlineMedium?.copyWith(color: textColor)),
+      headlineSmall: GoogleFonts.nunito(textStyle: base.headlineSmall?.copyWith(color: textColor)),
+      titleLarge: GoogleFonts.nunito(textStyle: base.titleLarge?.copyWith(color: textColor)),
+      titleMedium: GoogleFonts.nunito(textStyle: base.titleMedium?.copyWith(color: textColor)),
+      titleSmall: GoogleFonts.nunito(textStyle: base.titleSmall?.copyWith(color: textColor)),
+    ).apply(
+      bodyColor: textColor,
+      displayColor: textColor,
+    );
+  }
+
   static ThemeData get lightTheme {
     return ThemeData(
       brightness: Brightness.light,
-      primaryColor: AppColors.primary,
+      primaryColor: AppColors.primaryLight,
       scaffoldBackgroundColor: AppColors.backgroundLight,
       colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
+        primary: AppColors.primaryLight,
+        secondary: AppColors.secondaryLight,
         surface: AppColors.surfaceLight,
         error: AppColors.error,
       ),
-      textTheme: GoogleFonts.plusJakartaSansTextTheme().apply(
-        bodyColor: AppColors.textLight,
-        displayColor: AppColors.textLight,
-      ),
+      textTheme: _buildTextTheme(ThemeData.light().textTheme, AppColors.textLight),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceLight,
@@ -31,7 +45,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -50,18 +64,15 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
-      primaryColor: AppColors.primary,
+      primaryColor: AppColors.primaryDark,
       scaffoldBackgroundColor: AppColors.backgroundDark,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
+        primary: AppColors.primaryDark,
+        secondary: AppColors.secondaryDark,
         surface: AppColors.surfaceDark,
         error: AppColors.error,
       ),
-      textTheme: GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme).apply(
-        bodyColor: AppColors.textDark,
-        displayColor: AppColors.textDark,
-      ),
+      textTheme: _buildTextTheme(ThemeData.dark().textTheme, AppColors.textDark),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceDark,
@@ -75,7 +86,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryDark, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

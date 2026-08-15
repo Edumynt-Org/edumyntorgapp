@@ -24,8 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 8),
+            Icon(Icons.error_outline, color: Colors.white),
+            SizedBox(width: 8),
             Expanded(child: Text(message)),
           ],
         ),
@@ -69,34 +69,34 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 32),
-              const Text(
+              SizedBox(height: 32),
+              Text(
                 'Edumynt Org',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: 8),
+              Text(
                 'Enter your email and password to log in to your account.',
                 style: TextStyle(
                   fontSize: 16,
                   color: AppColors.textMutedLight,
                 ),
               ),
-              const SizedBox(height: 48),
+              SizedBox(height: 48),
               CustomTextField(
                 label: 'Email',
                 hintText: 'you@example.com',
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Password',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
@@ -107,18 +107,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       minimumSize: Size.zero,
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Forgot password?',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
@@ -126,35 +126,35 @@ class _LoginScreenState extends State<LoginScreen> {
                   hintText: '••••••••',
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               CustomButton(
                 text: 'Log In',
                 isLoading: _isLoading,
                 onPressed: _login,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     "Don't have an account? ",
                     style: TextStyle(color: AppColors.textMutedLight),
                   ),
                   GestureDetector(
                     onTap: () => context.push('/register'),
-                    child: const Text(
+                    child: Text(
                       "Sign up",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 48),
+              SizedBox(height: 48),
               const Divider(),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               CustomButton(
                 text: 'Skip for now',
                 isGhost: true,

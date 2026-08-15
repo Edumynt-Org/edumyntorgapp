@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('Home', style: TextStyle(fontWeight: FontWeight.w900)),
+        title: Text('Home', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: false,
         backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
         elevation: 0,
@@ -50,27 +50,27 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
-                const Text('🔥', style: TextStyle(fontSize: 20)),
-                const SizedBox(width: 4),
+                Text('🔥', style: TextStyle(fontSize: 20)),
+                SizedBox(width: 4),
                 Text('12', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black, fontSize: 16)),
-                const SizedBox(width: 16),
-                const Text('💎', style: TextStyle(fontSize: 20)),
-                const SizedBox(width: 4),
-                const Text('450', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary, fontSize: 16)),
+                SizedBox(width: 16),
+                Text('💎', style: TextStyle(fontSize: 20)),
+                SizedBox(width: 4),
+                Text('450', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.secondary, fontSize: 16)),
               ],
             ),
           )
         ],
       ),
       body: _isLoading 
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadData,
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 children: [
                   _buildContinueReading(isDark),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   ..._homepageLists.map((list) => _buildCarousel(list, isDark)),
                 ],
               ),
@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Continue Reading', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black)),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
               color: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
@@ -102,17 +102,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: isDark ? Colors.grey[800] : Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Center(child: Text('📖', style: TextStyle(fontSize: 24))),
+                  child: Center(child: Text('📖', style: TextStyle(fontSize: 24))),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('The Way of Kings', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       Text('Part 1, Chapter 3', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12),
                       Container(
                         height: 12,
                         width: double.infinity,
@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           widthFactor: 0.35,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               borderRadius: BorderRadius.circular(6),
                             ),
                           ),
@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           if (list.description != null) ...[
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
@@ -165,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ],
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           if (list.books.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -228,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             book.title,
             maxLines: 2,
@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
         ),
       ),
     );

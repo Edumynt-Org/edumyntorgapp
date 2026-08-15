@@ -108,7 +108,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   
                   Expanded(
                     child: SingleChildScrollView(
@@ -118,7 +118,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                         children: [
                           // Font Size
                           Text('FONT SIZE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: onSurfaceMuted)),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
@@ -133,12 +133,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                     elevation: 0,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
-                                  child: const Text('A-', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                  child: Text('A-', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              SizedBox(width: 16),
                               Text('${_fontSize.toInt()}px', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: onSurface)),
-                              const SizedBox(width: 16),
+                              SizedBox(width: 16),
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: () {
@@ -151,17 +151,17 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                     elevation: 0,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
-                                  child: const Text('A+', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                  child: Text('A+', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ],
                           ),
                           
-                          const SizedBox(height: 32),
+                          SizedBox(height: 32),
                           
                           // Font Family
                           Text('FONT STYLE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: onSurfaceMuted)),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
@@ -178,7 +178,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                   child: Text('Sans Serif', style: TextStyle(fontFamily: 'PlusJakartaSans', color: onSurface)),
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              SizedBox(width: 16),
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () {
@@ -196,11 +196,11 @@ class _ReaderScreenState extends State<ReaderScreen> {
                             ],
                           ),
                           
-                          const SizedBox(height: 32),
+                          SizedBox(height: 32),
                           
                           // Theme Toggle
                           Text('THEME', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: onSurfaceMuted)),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Row(
                             children: [
                               Expanded(
@@ -217,7 +217,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                                   child: Text('Light', style: TextStyle(color: onSurface)),
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              SizedBox(width: 16),
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () {
@@ -235,11 +235,11 @@ class _ReaderScreenState extends State<ReaderScreen> {
                             ],
                           ),
 
-                          const SizedBox(height: 48),
+                          SizedBox(height: 48),
 
                           // Live Preview at bottom
                           Text('PREVIEW', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: onSurfaceMuted)),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           Container(
                             padding: const EdgeInsets.all(16),
                             width: double.infinity,
@@ -258,7 +258,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 48),
+                          SizedBox(height: 48),
 
                           // Reset to Default
                           Center(
@@ -280,7 +280,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 48),
+                          SizedBox(height: 48),
                         ],
                       ),
                     ),
@@ -328,7 +328,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
     if (_isLoading) {
       return Scaffold(
         backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -373,7 +373,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                       color: isDark ? Colors.white : Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
                   Text(
                     content,
                     style: TextStyle(
@@ -383,7 +383,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                       color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  SizedBox(height: 48),
                   
                   // Bottom Nav Buttons
                   Row(
@@ -400,13 +400,13 @@ class _ReaderScreenState extends State<ReaderScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               elevation: 0,
                             ),
-                            child: const Text('← Previous'),
+                            child: Text('← Previous'),
                           ),
                         )
                       else
                         const Spacer(),
                       
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       
                       if (hasNext)
                         Expanded(
@@ -415,12 +415,12 @@ class _ReaderScreenState extends State<ReaderScreen> {
                               context.pushReplacement('/book/${widget.slug}/${widget.editionId}/${flatToc[currentIndex + 1].id}');
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               elevation: 0,
                             ),
-                            child: const Text('Next →'),
+                            child: Text('Next →'),
                           ),
                         )
                       else
@@ -516,7 +516,7 @@ class _ReaderScreenState extends State<ReaderScreen> {
                       item.title,
                       style: TextStyle(
                         fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                        color: isCurrent ? AppColors.primary : (isDark ? Colors.white : Colors.black),
+                        color: isCurrent ? Theme.of(context).colorScheme.primary : (isDark ? Colors.white : Colors.black),
                       ),
                     ),
                     onTap: () {

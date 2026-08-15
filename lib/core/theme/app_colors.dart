@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Brand Colors (Duolingo-inspired)
-  static const Color primary = Color(0xFF58CC02); // Vibrant Green
-  static const Color primaryDark = Color(0xFF58A700); // Darker Green for 3D bottom
-  static const Color secondary = Color(0xFF1CB0F6); // Playful Blue
+  // Brand Colors
+  static const Color primaryLight = Color(0xFF1E3A8A); // Deep Blue
+  static const Color primaryDark = Color(0xFF60A5FA); // Light Blue
 
-  
+  static const Color secondaryLight = Color(0xFFE0E7FF);
+  static const Color secondaryDark = Color(0x1960A5FA); // 10% opacity blue
+
+  static const Color accentLight = Color(0xFFD97706); // Gold
+  static const Color accentDark = Color(0xFFFBBF24); // Gold
+
+  // Legacy aliases for existing screens
+  static const Color primary = primaryLight;
+  static const Color secondary = secondaryLight;
+
   // Backgrounds
-  static const Color backgroundLight = Color(0xFFFAFAFA);
-  static const Color backgroundDark = Color(0xFF09090B); // Shadcn zinc-950
+  static const Color backgroundLight = Color(0xFFF4F4F5);
+  static const Color backgroundDark = Color(0xFF09090B);
   
   // Surfaces
-  static const Color surfaceLight = Colors.white;
-  static const Color surfaceDark = Color(0xFF18181B); // Shadcn zinc-900
+  static const Color surfaceLight = Color(0xFFFFFFFF);
+  static const Color surfaceDark = Color(0xFF18181B);
   
   // Text
   static const Color textLight = Color(0xFF09090B);

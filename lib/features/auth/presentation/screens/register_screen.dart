@@ -27,8 +27,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 8),
+            Icon(Icons.error_outline, color: Colors.white),
+            SizedBox(width: 8),
             Expanded(child: Text(message)),
           ],
         ),
@@ -84,25 +84,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 16),
-              const Text(
+              SizedBox(height: 16),
+              Text(
                 'Edumynt Org',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 _isSuccess 
                   ? "We've sent you a verification email."
                   : 'Join us to review books and save your progress.',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   color: AppColors.textMutedLight,
                 ),
               ),
-              const SizedBox(height: 48),
+              SizedBox(height: 48),
               
               if (_isSuccess) ...[
                 Container(
@@ -113,23 +113,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         height: 64,
                         width: 64,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.2),
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check_circle_outline, color: AppColors.primary, size: 40),
+                        child: Icon(Icons.check_circle_outline, color: Theme.of(context).colorScheme.primary, size: 40),
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
+                      SizedBox(height: 16),
+                      Text(
                         'Check your inbox',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
+                      SizedBox(height: 8),
+                      Text(
                         'We sent a verification link to your email. Please click it to activate your account.',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: AppColors.textMutedLight),
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: 32),
                       CustomButton(
                         text: 'Go to Login',
                         isSecondary: true,
@@ -144,56 +144,56 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   hintText: 'John Doe',
                   controller: _nameController,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 CustomTextField(
                   label: 'Email',
                   hintText: 'you@example.com',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 CustomTextField(
                   label: 'Password',
                   hintText: '••••••••',
                   controller: _passwordController,
                   obscureText: true,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 CustomTextField(
                   label: 'Confirm Password',
                   hintText: '••••••••',
                   controller: _confirmPasswordController,
                   obscureText: true,
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
                 CustomButton(
                   text: 'Create Account',
                   isLoading: _isLoading,
                   onPressed: _register,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       "Already have an account? ",
                       style: TextStyle(color: AppColors.textMutedLight),
                     ),
                     GestureDetector(
                       onTap: () => context.pop(),
-                      child: const Text(
+                      child: Text(
                         "Log in",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
                 const Divider(),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 CustomButton(
                   text: 'Skip for now',
                   isGhost: true,

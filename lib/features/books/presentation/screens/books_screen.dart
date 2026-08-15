@@ -77,7 +77,7 @@ class _BooksScreenState extends State<BooksScreen> {
                   border: InputBorder.none,
                 ),
               )
-            : const Text('Browse', style: TextStyle(fontWeight: FontWeight.w900)),
+            : Text('Browse', style: TextStyle(fontWeight: FontWeight.w900)),
         centerTitle: false,
         actions: [
           IconButton(
@@ -92,16 +92,16 @@ class _BooksScreenState extends State<BooksScreen> {
               });
             },
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
           _buildFilterChips(isDark),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator())
                 : _books.isEmpty
                     ? _buildEmptyState(isDark)
                     : _buildGrid(isDark),
@@ -121,11 +121,11 @@ class _BooksScreenState extends State<BooksScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
           _buildChip('All Books', true, isDark),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           _buildChip('Audiobooks 🎧', false, isDark),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           _buildChip('Ebooks 📖', false, isDark),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           _buildChip('Fantasy', false, isDark),
         ],
       ),
@@ -136,10 +136,10 @@ class _BooksScreenState extends State<BooksScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
+        color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.5) : (isDark ? AppColors.borderDark : AppColors.borderLight), 
+          color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5) : (isDark ? AppColors.borderDark : AppColors.borderLight), 
           width: 2
         ),
       ),
@@ -148,7 +148,7 @@ class _BooksScreenState extends State<BooksScreen> {
           label,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isSelected ? AppColors.primary : (isDark ? Colors.white : Colors.black),
+            color: isSelected ? Theme.of(context).colorScheme.primary : (isDark ? Colors.white : Colors.black),
           ),
         ),
       ),
@@ -160,10 +160,10 @@ class _BooksScreenState extends State<BooksScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('🤷‍♂️', style: TextStyle(fontSize: 64)),
-          const SizedBox(height: 16),
+          Text('🤷‍♂️', style: TextStyle(fontSize: 64)),
+          SizedBox(height: 16),
           Text('No books found', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text('Try searching for something else.', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
         ],
       ),
@@ -227,9 +227,9 @@ class _BooksScreenState extends State<BooksScreen> {
                           shape: BoxShape.circle,
                           border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight, width: 2),
                         ),
-                        child: const Text('🎧', style: TextStyle(fontSize: 10)),
+                        child: Text('🎧', style: TextStyle(fontSize: 10)),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -237,7 +237,7 @@ class _BooksScreenState extends State<BooksScreen> {
                           shape: BoxShape.circle,
                           border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight, width: 2),
                         ),
-                        child: const Text('📖', style: TextStyle(fontSize: 10)),
+                        child: Text('📖', style: TextStyle(fontSize: 10)),
                       ),
                     ],
                   ),
@@ -246,7 +246,7 @@ class _BooksScreenState extends State<BooksScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
         Text(
           book.title,
           maxLines: 2,
@@ -271,7 +271,7 @@ class _BooksScreenState extends State<BooksScreen> {
         child: Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
         ),
       ),
     );

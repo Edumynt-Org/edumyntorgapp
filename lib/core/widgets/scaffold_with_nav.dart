@@ -34,11 +34,11 @@ class ScaffoldWithNav extends StatelessWidget {
           currentIndex: navigationShell.currentIndex,
           onTap: _goBranch,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: AppColors.primary,
+          selectedItemColor: Theme.of(context).colorScheme.primary,
           unselectedItemColor: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-          items: const [
+          selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          unselectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
+          items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home),

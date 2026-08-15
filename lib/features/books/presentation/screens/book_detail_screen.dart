@@ -93,13 +93,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black),
                 ),
                 if (_bundle!.authors.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     'by ${_bundle!.authors.join(', ')}',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
                   ),
                 ],
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 Text(
                   _bundle!.book.description ?? '',
                   style: TextStyle(fontSize: 16, height: 1.6, color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87),
@@ -119,7 +119,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(leading: const BackButton()),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -178,7 +178,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                     ),
                     onPressed: () {},
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                 ],
               ),
               
@@ -202,10 +202,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                           borderRadius: BorderRadius.circular(11),
                           child: _bundle!.book.coverUrl != null && _bundle!.book.coverUrl!.isNotEmpty
                               ? Image.network(_bundle!.book.coverUrl!, fit: BoxFit.cover)
-                              : Center(child: Text(_bundle!.book.title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
+                              : Center(child: Text(_bundle!.book.title, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       // Info
                       Expanded(
                         child: Column(
@@ -216,13 +216,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, height: 1.1, color: isDark ? Colors.white : Colors.black),
                             ),
                             if (_bundle!.authors.isNotEmpty) ...[
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Text(
                                 'by ${_bundle!.authors.join(', ')}',
                                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
                               ),
                             ],
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12),
                             // Badges
                             Wrap(
                               spacing: 6,
@@ -235,7 +235,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                               ],
                             ),
                             if (_bundle!.book.description != null && _bundle!.book.description!.isNotEmpty) ...[
-                              const SizedBox(height: 12),
+                              SizedBox(height: 12),
                               Text(
                                 _bundle!.book.description!,
                                 maxLines: 3,
@@ -246,7 +246,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                                 onTap: () => _showDescriptionModal(context, isDark),
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 4),
-                                  child: Text('Read more', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                                  child: Text('Read more', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
                                 ),
                               ),
                             ]
@@ -265,12 +265,12 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                   TabBar(
                     controller: _tabController,
                     isScrollable: false,
-                    labelColor: AppColors.primary,
+                    labelColor: Theme.of(context).colorScheme.primary,
                     unselectedLabelColor: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-                    indicatorColor: AppColors.primary,
+                    indicatorColor: Theme.of(context).colorScheme.primary,
                     indicatorWeight: 3,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
-                    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    labelStyle: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                    unselectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     tabs: _tabs.map((t) {
                       String icon = '';
                       if (t == 'Read') icon = '📖 ';
@@ -323,10 +323,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
+                color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary.withValues(alpha: 0.5) : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                  color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5) : (isDark ? AppColors.borderDark : AppColors.borderLight),
                 ),
               ),
               child: Text(
@@ -334,7 +334,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: isSelected ? AppColors.primary : (isDark ? Colors.white : Colors.black),
+                  color: isSelected ? Theme.of(context).colorScheme.primary : (isDark ? Colors.white : Colors.black),
                 ),
               ),
             ),
@@ -362,7 +362,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
             ],
           ),
         ),
-        _buildStickyCTA('Start Reading', AppColors.primary, isDark, _selectedTextEditionId),
+        _buildStickyCTA('Start Reading', Theme.of(context).colorScheme.primary, isDark, _selectedTextEditionId),
       ],
     );
   }
@@ -384,13 +384,13 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
               ),
               if (narrator != null) ...[
                 Text('🎙️ Narrated by $narrator', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
               ],
               TocAccordionWidget(items: structures, isDark: isDark),
             ],
           ),
         ),
-        _buildStickyCTA('Start Listening', AppColors.secondary, isDark, _selectedAudioEditionId),
+        _buildStickyCTA('Start Listening', Theme.of(context).colorScheme.secondary, isDark, _selectedAudioEditionId),
       ],
     );
   }
@@ -412,14 +412,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
             ...allEditions.map((e) => _buildDetailSwitcherTab(e['id'] as String, '${e['type'] == 'audio' ? '🎧' : '📖'} ${e['title']}', isDark)),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
         if (_detailsViewId == 'book') ...[
           _buildDetailRow('First Published', _bundle!.book.firstPublishedYear?.toString(), isDark),
           _buildDetailRow('Original Language', _bundle!.book.originalLanguage, isDark),
           if (_bundle!.genres.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text('Genres', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -459,10 +459,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
+          color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primary.withValues(alpha: 0.5) : (isDark ? AppColors.borderDark : AppColors.borderLight),
+            color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5) : (isDark ? AppColors.borderDark : AppColors.borderLight),
           ),
         ),
         child: Text(
@@ -470,7 +470,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: isSelected ? AppColors.primary : (isDark ? Colors.white : Colors.black),
+            color: isSelected ? Theme.of(context).colorScheme.primary : (isDark ? Colors.white : Colors.black),
           ),
         ),
       ),
@@ -485,7 +485,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
-          const SizedBox(height: 2),
+          SizedBox(height: 2),
           Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
         ],
       ),
@@ -497,10 +497,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('⭐', style: TextStyle(fontSize: 48)),
-          const SizedBox(height: 16),
+          Text('⭐', style: TextStyle(fontSize: 48)),
+          SizedBox(height: 16),
           Text('Reviews Coming Soon', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text('We\'re building something special.', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
         ],
       ),
@@ -536,7 +536,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> with TickerProvider
             alignment: Alignment.center,
             child: Text(
               text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
         ),
@@ -580,8 +580,8 @@ class _TocAccordionWidgetState extends State<TocAccordionWidget> {
           padding: const EdgeInsets.symmetric(vertical: 32),
           child: Column(
             children: [
-              const Text('📄', style: TextStyle(fontSize: 32)),
-              const SizedBox(height: 8),
+              Text('📄', style: TextStyle(fontSize: 32)),
+              SizedBox(height: 8),
               Text('Content coming soon.', style: TextStyle(fontWeight: FontWeight.bold, color: widget.isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
             ],
           ),
@@ -598,23 +598,23 @@ class _TocAccordionWidgetState extends State<TocAccordionWidget> {
           return Container(
             margin: const EdgeInsets.only(bottom: 4),
             decoration: BoxDecoration(
-              color: isNextToRead ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+              color: isNextToRead ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
-              border: isNextToRead ? Border.all(color: AppColors.primary.withValues(alpha: 0.2)) : null,
+              border: isNextToRead ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)) : null,
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
               dense: true,
               leading: SizedBox(
                 width: 24,
-                child: Text('${index + 1}', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: isNextToRead ? AppColors.primary : (widget.isDark ? AppColors.textMutedDark : AppColors.textMutedLight))),
+                child: Text('${index + 1}', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: isNextToRead ? Theme.of(context).colorScheme.primary : (widget.isDark ? AppColors.textMutedDark : AppColors.textMutedLight))),
               ),
               title: Text(item.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: widget.isDark ? Colors.white : Colors.black)),
               trailing: isNextToRead
                   ? Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4)),
-                      child: const Text('NEXT', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white)),
+                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, borderRadius: BorderRadius.circular(4)),
+                      child: Text('NEXT', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white)),
                     )
                   : null,
             ),
@@ -644,9 +644,9 @@ class _TocAccordionWidgetState extends State<TocAccordionWidget> {
                       width: 24,
                       child: Text('${index + 1}', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: widget.isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     Text(isOpen ? '▾' : '▸', style: TextStyle(fontWeight: FontWeight.bold, color: widget.isDark ? AppColors.textMutedDark : AppColors.textMutedLight, fontSize: 16)),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Expanded(
                       child: Text(item.title, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: widget.isDark ? Colors.white : Colors.black)),
                     ),

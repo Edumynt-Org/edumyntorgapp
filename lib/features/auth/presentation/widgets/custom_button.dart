@@ -31,14 +31,14 @@ class CustomButton extends StatelessWidget {
           ),
         ),
         child: isLoading
-            ? const SizedBox(
+            ? SizedBox(
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : Text(
                 text,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -56,14 +56,14 @@ class CustomButton extends StatelessWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             color: isSecondary ? Colors.transparent : AppColors.primaryDark,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
             padding: EdgeInsets.only(bottom: isSecondary ? 0 : 4),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
               decoration: BoxDecoration(
-                color: isSecondary ? AppColors.surfaceLight : AppColors.primary,
+                color: isSecondary ? AppColors.surfaceLight : Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
                 border: isSecondary ? Border.all(color: AppColors.borderLight) : null,
               ),
@@ -75,7 +75,7 @@ class CustomButton extends StatelessWidget {
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                              isSecondary ? AppColors.primary : Colors.white),
+                              isSecondary ? Theme.of(context).colorScheme.primary : Colors.white),
                         ),
                       )
                     : Text(
