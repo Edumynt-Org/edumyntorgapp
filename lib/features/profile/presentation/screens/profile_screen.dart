@@ -362,17 +362,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ).colorScheme.primary.withValues(alpha: 0.3),
                 width: 4,
               ),
+              image: authRepo.avatarUrl != null
+                  ? DecorationImage(
+                      image: NetworkImage(authRepo.avatarUrl!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: Center(
-              child: Text(
-                initial,
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w900,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
+            child: authRepo.avatarUrl == null
+                ? Center(
+                    child: Text(
+                      initial,
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  )
+                : null,
           ),
           const SizedBox(height: 16),
           Text(

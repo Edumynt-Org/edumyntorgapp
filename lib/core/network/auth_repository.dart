@@ -14,11 +14,13 @@ class AuthRepository extends ChangeNotifier {
 
   String? _token;
   String? _userName;
+  String? _avatarUrl;
   bool _isLoading = true;
 
   AuthRepository(this._prefs, this._secureStorage, String? initialToken) {
     _token = initialToken;
     _userName = _prefs.getString('user_name');
+    _avatarUrl = _prefs.getString('user_avatar');
     _isLoading = false;
   }
 
@@ -26,6 +28,7 @@ class AuthRepository extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get token => _token;
   String? get userName => _userName;
+  String? get avatarUrl => _avatarUrl;
 
   Future<void> _setToken(String? token) async {
     _token = token;
@@ -34,7 +37,9 @@ class AuthRepository extends ChangeNotifier {
     } else {
       await _secureStorage.delete(key: 'payload_token');
       await _prefs.remove('user_name');
+      await _prefs.remove('user_avatar');
       _userName = null;
+      _avatarUrl = null;
     }
     notifyListeners();
   }
@@ -55,9 +60,39 @@ class AuthRepository extends ChangeNotifier {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['token'] != null) {
-        if (data['user'] != null && data['user']['name'] != null) {
-          _userName = data['user']['name'];
-          await _prefs.setString('user_name', _userName!);
+        final user = data['user'];
+        if (user != null) {
+          if (user['name'] != null) {
+            _userName = user['name'];
+            await _prefs.setString('user_name', _userName!);
+          }
+
+          // Attempt to fetch profile for avatar
+          if (user['id'] != null) {
+            try {
+              final profileRes = await http.get(
+                Uri.parse(
+                  '${ApiConfig.baseUrl}/api/profiles?where[user][equals]=${user['id']}',
+                ),
+                headers: {'Authorization': 'JWT ${data['token']}'},
+              );
+              if (profileRes.statusCode == 200) {
+                final profileData = jsonDecode(profileRes.body);
+                if (profileData['docs'] != null &&
+                    profileData['docs'].isNotEmpty) {
+                  final profile = profileData['docs'][0];
+                  if (profile['avatar'] != null &&
+                      profile['avatar']['url'] != null) {
+                    _avatarUrl =
+                        '${ApiConfig.baseUrl}${profile['avatar']['url']}';
+                    await _prefs.setString('user_avatar', _avatarUrl!);
+                  }
+                }
+              }
+            } catch (_) {
+              // Ignore profile fetch failure
+            }
+          }
         }
         await _setToken(data['token']);
         return null;
