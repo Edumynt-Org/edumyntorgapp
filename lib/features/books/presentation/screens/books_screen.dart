@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/network/catalog_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/network/catalog_models.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class BooksScreen extends StatefulWidget {
+class BooksScreen extends ConsumerStatefulWidget {
   const BooksScreen({super.key});
 
   @override
-  State<BooksScreen> createState() => _BooksScreenState();
+  ConsumerState<BooksScreen> createState() => _BooksScreenState();
 }
 
-class _BooksScreenState extends State<BooksScreen> {
+class _BooksScreenState extends ConsumerState<BooksScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
   bool _isSearchExpanded = false;
@@ -44,7 +44,7 @@ class _BooksScreenState extends State<BooksScreen> {
   Future<void> _search(String query) async {
     setState(() => _isLoading = true);
 
-    final repo = Provider.of<CatalogRepository>(context, listen: false);
+    final repo = ref.read(catalogRepositoryProvider);
     final results = await repo.searchBooks(query);
 
     if (mounted) {
@@ -88,7 +88,10 @@ class _BooksScreenState extends State<BooksScreen> {
                   border: InputBorder.none,
                 ),
               )
-            : Text('Browse', style: TextStyle(fontWeight: FontWeight.w900)),
+            : const Text(
+                'Books',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
         centerTitle: false,
         actions: [
           IconButton(
@@ -106,16 +109,16 @@ class _BooksScreenState extends State<BooksScreen> {
               });
             },
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
           _buildFilterChips(isDark),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Expanded(
             child: _isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : _books.isEmpty
                 ? _buildEmptyState(isDark)
                 : _buildGrid(isDark),
@@ -133,11 +136,11 @@ class _BooksScreenState extends State<BooksScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         children: [
           _buildChip('All Books', true, isDark),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           _buildChip('Audiobooks 🎧', false, isDark),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           _buildChip('Ebooks 📖', false, isDark),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           _buildChip('Fantasy', false, isDark),
         ],
       ),
@@ -178,8 +181,8 @@ class _BooksScreenState extends State<BooksScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('🤷‍♂️', style: TextStyle(fontSize: 64)),
-          SizedBox(height: 16),
+          const Text('🤷‍♂️', style: TextStyle(fontSize: 64)),
+          const SizedBox(height: 16),
           Text(
             'No books found',
             style: TextStyle(
@@ -188,7 +191,7 @@ class _BooksScreenState extends State<BooksScreen> {
               color: isDark ? Colors.white : Colors.black,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Try searching for something else.',
             style: TextStyle(
@@ -273,9 +276,12 @@ class _BooksScreenState extends State<BooksScreen> {
                               width: 2,
                             ),
                           ),
-                          child: Text('🎧', style: TextStyle(fontSize: 10)),
+                          child: const Text(
+                            '🎧',
+                            style: TextStyle(fontSize: 10),
+                          ),
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
@@ -290,7 +296,10 @@ class _BooksScreenState extends State<BooksScreen> {
                               width: 2,
                             ),
                           ),
-                          child: Text('📖', style: TextStyle(fontSize: 10)),
+                          child: const Text(
+                            '📖',
+                            style: TextStyle(fontSize: 10),
+                          ),
                         ),
                       ],
                     ),
@@ -299,7 +308,7 @@ class _BooksScreenState extends State<BooksScreen> {
               ),
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             book.title,
             maxLines: 2,
@@ -324,7 +333,7 @@ class _BooksScreenState extends State<BooksScreen> {
         child: Text(
           title,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
         ),
       ),
     );

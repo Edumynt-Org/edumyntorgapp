@@ -1,21 +1,22 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import '../../../../core/network/auth_repository.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
   bool _isSuccess = false;
@@ -71,7 +72,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() => _isLoading = true);
 
-    final authRepo = Provider.of<AuthRepository>(context, listen: false);
+    final authRepo = ref.read(authRepositoryProvider);
     final error = await authRepo.forgotPassword(email);
 
     if (!mounted) return;
@@ -94,10 +95,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: !_isSuccess,
         leading: _isSuccess
-            ? null
+            ? const SizedBox.shrink()
             : IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () => context.pop(),
               ),
       ),
@@ -147,8 +149,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     children: [
                       Lottie.asset(
                         'assets/animations/success.lottie',
-                        width: 240,
-                        height: 240,
+                        width: 320,
+                        height: 320,
                         repeat: false,
                         errorBuilder: (context, error, stackTrace) {
                           // Fallback until the asset is provided
@@ -169,27 +171,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           );
                         },
                       ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Check your inbox',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Click the link in the email we just sent to reset your password. You can safely go back to login.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.textMutedLight,
-                          fontSize: 16,
-                        ),
-                      ),
                       SizedBox(height: 32),
                       AppButton(
-                        text: 'Back to Login',
-                        onPressed: () => context.pop(),
+                        text: 'Go to Login',
+                        onPressed: () => context.go('/login'),
                       ),
                       SizedBox(height: 16),
                       TextButton(

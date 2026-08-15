@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/network/catalog_repository.dart';
-import '../../../../core/network/catalog_models.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/network/catalog_models.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isLoading = true;
   List<BookListModel> _homepageLists = [];
 
@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    final repo = Provider.of<CatalogRepository>(context, listen: false);
+    final repo = ref.read(catalogRepositoryProvider);
     final lists = await repo.getHomepageLists();
     if (mounted) {
       setState(() {
@@ -36,60 +36,140 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final authRepo = ref.watch(authRepositoryProvider);
+    final isAuthenticated = authRepo.isAuthenticated;
 
     return Scaffold(
       backgroundColor: isDark
           ? AppColors.backgroundDark
           : AppColors.backgroundLight,
-      appBar: AppBar(
-        title: Text('Home', style: TextStyle(fontWeight: FontWeight.w900)),
-        centerTitle: false,
-        backgroundColor: isDark
-            ? AppColors.backgroundDark
-            : AppColors.backgroundLight,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Text('🔥', style: TextStyle(fontSize: 20)),
-                SizedBox(width: 4),
-                Text(
-                  '12',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black,
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(width: 16),
-                Text('💎', style: TextStyle(fontSize: 20)),
-                SizedBox(width: 4),
-                Text(
-                  '450',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.secondary,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadData,
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                children: [
-                  _buildContinueReading(isDark),
-                  SizedBox(height: 32),
-                  ..._homepageLists.map((list) => _buildCarousel(list, isDark)),
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    pinned: true,
+                    floating: true,
+                    elevation: 0,
+                    scrolledUnderElevation: 0,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0.95),
+                    titleSpacing: 16,
+                    toolbarHeight: 72,
+                    title: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            if (isAuthenticated) {
+                              context.go('/profile');
+                            } else {
+                              context.go('/login');
+                            }
+                          },
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundColor: isDark
+                                    ? AppColors.surfaceDark
+                                    : AppColors.surfaceLight,
+                                child: Icon(
+                                  isAuthenticated
+                                      ? Icons.person
+                                      : Icons.person_outline,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    isAuthenticated ? 'Welcome,' : 'Login',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isDark
+                                          ? AppColors.textMutedDark
+                                          : AppColors.textMutedLight,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    isAuthenticated
+                                        ? (authRepo.userName
+                                                  ?.split(' ')
+                                                  .first ??
+                                              'Reader')
+                                        : 'Guest',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                      fontFamily: 'Nunito',
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.surfaceDark
+                                : AppColors.surfaceLight,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.borderDark
+                                  : AppColors.borderLight,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.local_fire_department_rounded,
+                                color: AppColors.accentDark,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '0',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.accentDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        _buildContinueReading(isDark),
+                        const SizedBox(height: 32),
+                        ..._homepageLists.map(
+                          (list) => _buildCarousel(list, isDark),
+                        ),
+                      ]),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -110,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: isDark ? Colors.white : Colors.black,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
               color: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
@@ -130,11 +210,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: isDark ? Colors.grey[800] : Colors.grey[300],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Text('📖', style: TextStyle(fontSize: 24)),
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         'Part 1, Chapter 3',
                         style: TextStyle(
@@ -158,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               : AppColors.textMutedLight,
                         ),
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       Container(
                         height: 12,
                         width: double.infinity,
@@ -208,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           if (list.description != null) ...[
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
@@ -223,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ],
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           if (list.books.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -308,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
               book.title,
               maxLines: 2,
@@ -334,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text(
           title,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
         ),
       ),
     );

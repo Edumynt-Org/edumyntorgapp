@@ -7,11 +7,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: AppButton(
-            text: 'Test',
-            isLoading: true,
-            onPressed: () {},
-          ),
+          body: AppButton(text: 'Test', isLoading: true, onPressed: () {}),
         ),
       ),
     );

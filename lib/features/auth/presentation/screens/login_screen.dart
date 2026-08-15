@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/network/auth_repository.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -46,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    final authRepo = Provider.of<AuthRepository>(context, listen: false);
+    final authRepo = ref.read(authRepositoryProvider);
     final error = await authRepo.login(email, password);
 
     if (!mounted) return;
@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (error != null) {
       _showError(error);
     } else {
-      context.go('/home');
+      context.go('/');
     }
   }
 

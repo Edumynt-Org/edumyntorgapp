@@ -1,46 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'core/network/auth_repository.dart';
-import 'core/network/catalog_repository.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'core/providers.dart';
 import 'core/theme/app_theme.dart';
-import 'core/theme/theme_provider.dart';
 import 'router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
+  const secureStorage = FlutterSecureStorage();
+  final initialToken = await secureStorage.read(key: 'payload_token');
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AuthRepository(prefs)),
-        ChangeNotifierProvider(create: (_) => ThemeProvider(prefs)),
-        Provider(create: (_) => CatalogRepository()),
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        secureStorageProvider.overrideWithValue(secureStorage),
+        initialTokenProvider.overrideWithValue(initialToken),
       ],
       child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Builder(
-      builder: (context) {
-        final themeProvider = context.watch<ThemeProvider>();
-        return MaterialApp.router(
-          title: 'Edumynt Library',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeProvider.themeMode,
-          routerConfig: appRouter,
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
+
+    return MaterialApp.router(
+      title: 'Edumynt Library',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: theme.themeMode,
+      routerConfig: appRouter,
     );
   }
 }

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/network/catalog_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/network/catalog_models.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class BookDetailScreen extends StatefulWidget {
+class BookDetailScreen extends ConsumerStatefulWidget {
   final String slug;
 
   const BookDetailScreen({super.key, required this.slug});
 
   @override
-  State<BookDetailScreen> createState() => _BookDetailScreenState();
+  ConsumerState<BookDetailScreen> createState() => _BookDetailScreenState();
 }
 
-class _BookDetailScreenState extends State<BookDetailScreen>
+class _BookDetailScreenState extends ConsumerState<BookDetailScreen>
     with TickerProviderStateMixin {
   bool _isLoading = true;
   BookDetailBundle? _bundle;
@@ -33,7 +33,7 @@ class _BookDetailScreenState extends State<BookDetailScreen>
   }
 
   Future<void> _fetchDetails() async {
-    final repo = Provider.of<CatalogRepository>(context, listen: false);
+    final repo = ref.read(catalogRepositoryProvider);
     final bundle = await repo.getBookDetails(widget.slug);
 
     if (mounted && bundle != null) {

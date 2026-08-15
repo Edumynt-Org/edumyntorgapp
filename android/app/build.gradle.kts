@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "org.edumynt"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

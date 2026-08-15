@@ -2,20 +2,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../../../../core/network/auth_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_text_field.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -94,7 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
-    final authRepo = Provider.of<AuthRepository>(context, listen: false);
+    final authRepo = ref.read(authRepositoryProvider);
     final error = await authRepo.register(name, email, password);
 
     if (!mounted) return;
@@ -115,10 +115,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: !_isSuccess,
         leading: _isSuccess
-            ? null
+            ? const SizedBox.shrink()
             : IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () => context.pop(),
               ),
       ),
@@ -152,8 +153,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       Lottie.asset(
                         'assets/animations/success.lottie',
-                        width: 240,
-                        height: 240,
+                        width: 320,
+                        height: 320,
                         repeat: false,
                         errorBuilder: (context, error, stackTrace) {
                           // Fallback until the asset is provided
@@ -174,27 +175,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           );
                         },
                       ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Check your inbox',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Please verify your email address. You can safely go to login now.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: AppColors.textMutedLight,
-                          fontSize: 16,
-                        ),
-                      ),
                       SizedBox(height: 32),
                       AppButton(
                         text: 'Go to Login',
-                        onPressed: () => context.pop(),
+                        onPressed: () => context.go('/login'),
                       ),
                       SizedBox(height: 16),
                       TextButton(

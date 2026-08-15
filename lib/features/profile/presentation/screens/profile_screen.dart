@@ -1,185 +1,195 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/providers.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/network/auth_repository.dart';
-import '../../../../core/theme/theme_provider.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void _showSettingsModal(BuildContext context, bool isDark, bool isLoggedIn) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         fullscreenDialog: true,
         builder: (BuildContext context) {
-          return Scaffold(
-            backgroundColor: isDark
-                ? AppColors.surfaceDark
-                : AppColors.backgroundLight,
-            appBar: AppBar(
-              backgroundColor: isDark
-                  ? AppColors.surfaceDark
-                  : AppColors.backgroundLight,
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              title: Text(
-                'Settings',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              actions: [
-                IconButton(
-                  icon: Icon(
-                    Icons.close,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'PREFERENCES',
+          return Consumer(
+            builder: (context, modalRef, child) {
+              return Scaffold(
+                backgroundColor: isDark
+                    ? AppColors.surfaceDark
+                    : AppColors.backgroundLight,
+                appBar: AppBar(
+                  backgroundColor: isDark
+                      ? AppColors.surfaceDark
+                      : AppColors.backgroundLight,
+                  elevation: 0,
+                  automaticallyImplyLeading: false,
+                  title: Text(
+                    'Settings',
                     style: TextStyle(
-                      fontSize: 12,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
-                      color: isDark
-                          ? AppColors.textMutedDark
-                          : AppColors.textMutedLight,
+                      color: isDark ? Colors.white : Colors.black,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: isDark
-                            ? AppColors.borderDark
-                            : AppColors.borderLight,
-                        width: 2,
+                  actions: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                  ],
+                ),
+                body: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'PREFERENCES',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                          color: isDark
+                              ? AppColors.textMutedDark
+                              : AppColors.textMutedLight,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.borderDark
+                                : AppColors.borderLight,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Dark Mode',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                modalRef.read(themeProvider).toggleTheme();
+                              },
+                              child: Container(
+                                width: 48,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Theme.of(context).colorScheme.primary
+                                      : AppColors.borderLight,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    AnimatedPositioned(
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      curve: Curves.easeInOut,
+                                      left: isDark ? 26 : 2,
+                                      top: 2,
+                                      child: Container(
+                                        width: 20,
+                                        height: 20,
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? AppColors.surfaceDark
+                                              : Colors.white,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isLoggedIn) ...[
+                        const SizedBox(height: 32),
                         Text(
-                          'Dark Mode',
+                          'ACCOUNT',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                            color: isDark
+                                ? AppColors.textMutedDark
+                                : AppColors.textMutedLight,
                           ),
                         ),
+                        const SizedBox(height: 8),
                         GestureDetector(
-                          onTap: () {
-                            context.read<ThemeProvider>().toggleTheme();
+                          onTap: () async {
+                            await modalRef
+                                .read(authRepositoryProvider)
+                                .logout();
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.remove('skipped_login');
+                            if (context.mounted) Navigator.pop(context);
                           },
                           child: Container(
-                            width: 48,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Theme.of(context).colorScheme.primary
-                                  : AppColors.borderLight,
-                              borderRadius: BorderRadius.circular(12),
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
                             ),
-                            child: Stack(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: AppColors.error,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                AnimatedPositioned(
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.easeInOut,
-                                  left: isDark ? 26 : 2,
-                                  top: 2,
-                                  child: Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? AppColors.surfaceDark
-                                          : Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
+                                Text(
+                                  'Log Out',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.error,
                                   ),
+                                ),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  color: AppColors.error,
+                                  size: 20,
                                 ),
                               ],
                             ),
                           ),
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                  if (isLoggedIn) ...[
-                    SizedBox(height: 32),
-                    Text(
-                      'ACCOUNT',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
-                        color: isDark
-                            ? AppColors.textMutedDark
-                            : AppColors.textMutedLight,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () async {
-                        await context.read<AuthRepository>().logout();
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.remove('skipped_login');
-                        if (context.mounted) Navigator.pop(context);
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.error, width: 2),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Log Out',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.error,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_forward,
-                              color: AppColors.error,
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),
@@ -189,14 +199,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isLoggedIn = context.watch<AuthRepository>().isAuthenticated;
+    final authRepo = ref.watch(authRepositoryProvider);
+    final isLoggedIn = authRepo.isAuthenticated;
 
     return Scaffold(
       backgroundColor: isDark
           ? AppColors.backgroundDark
           : AppColors.backgroundLight,
       appBar: AppBar(
-        title: Text('Profile', style: TextStyle(fontWeight: FontWeight.w900)),
+        title: const Text(
+          'Profile',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
         centerTitle: false,
         backgroundColor: isDark
             ? AppColors.backgroundDark
@@ -216,15 +230,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: 2,
                 ),
               ),
-              child: Icon(Icons.settings, size: 20),
+              child: const Icon(Icons.settings, size: 20),
             ),
             onPressed: () => _showSettingsModal(context, isDark, isLoggedIn),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
         ],
       ),
       body: isLoggedIn
-          ? _buildLoggedInState(isDark)
+          ? _buildLoggedInState(isDark, authRepo)
           : _buildLoggedOutState(isDark),
     );
   }
@@ -249,9 +263,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: 2,
                 ),
               ),
-              child: Center(child: Text('👤', style: TextStyle(fontSize: 48))),
+              child: const Center(
+                child: Text('👤', style: TextStyle(fontSize: 48)),
+              ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Text(
               'Join Edumynt Library',
               textAlign: TextAlign.center,
@@ -262,7 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 1.1,
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
               'Sign up to sync your reading progress, leave reviews, and build your digital library.',
               textAlign: TextAlign.center,
@@ -274,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     : AppColors.textMutedLight,
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -288,13 +304,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: Text(
+                child: const Text(
                   'Sign Up',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
                 ),
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
@@ -312,7 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 2,
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Log In',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
                 ),
@@ -324,7 +340,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLoggedInState(bool isDark) {
+  Widget _buildLoggedInState(bool isDark, var authRepo) {
+    final userName = authRepo.userName ?? 'Reader';
+    final initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'R';
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -346,7 +365,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Center(
               child: Text(
-                'U',
+                initial,
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.w900,
@@ -355,18 +374,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
-            'User',
+            userName,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
               color: isDark ? Colors.white : Colors.black,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            'user@example.com',
+            'Verified account',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -375,21 +394,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   : AppColors.textMutedLight,
             ),
           ),
-
-          SizedBox(height: 32),
-
+          const SizedBox(height: 32),
           Row(
             children: [
               Expanded(child: _buildStatCard('0', 'BOOKS READ', isDark)),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(child: _buildStatCard('0h', 'LISTENING TIME', isDark)),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(child: _buildStatCard('0', 'REVIEWS', isDark)),
             ],
           ),
-
-          SizedBox(height: 32),
-
+          const SizedBox(height: 32),
           Align(
             alignment: Alignment.centerLeft,
             child: Text(
@@ -401,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 48),
@@ -414,8 +429,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Column(
               children: [
-                Text('📚', style: TextStyle(fontSize: 32)),
-                SizedBox(height: 8),
+                const Text('📚', style: TextStyle(fontSize: 32)),
+                const SizedBox(height: 8),
                 Text(
                   'Your library is empty',
                   style: TextStyle(
@@ -454,7 +469,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: isDark ? Colors.white : Colors.black,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             label,
             textAlign: TextAlign.center,

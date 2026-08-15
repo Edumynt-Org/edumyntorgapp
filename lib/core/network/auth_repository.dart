@@ -1,33 +1,40 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'api_config.dart';
 
 class AuthRepository extends ChangeNotifier {
   final SharedPreferences _prefs;
+  final FlutterSecureStorage _secureStorage;
 
   // Base URL specifically for the Users collection endpoints
   String get _baseUrl => '${ApiConfig.baseUrl}/api/users';
 
   String? _token;
+  String? _userName;
   bool _isLoading = true;
 
-  AuthRepository(this._prefs) {
-    _token = _prefs.getString('payload_token');
+  AuthRepository(this._prefs, this._secureStorage, String? initialToken) {
+    _token = initialToken;
+    _userName = _prefs.getString('user_name');
     _isLoading = false;
   }
 
   bool get isAuthenticated => _token != null;
   bool get isLoading => _isLoading;
   String? get token => _token;
+  String? get userName => _userName;
 
   Future<void> _setToken(String? token) async {
     _token = token;
     if (token != null) {
-      await _prefs.setString('payload_token', token);
+      await _secureStorage.write(key: 'payload_token', value: token);
     } else {
-      await _prefs.remove('payload_token');
+      await _secureStorage.delete(key: 'payload_token');
+      await _prefs.remove('user_name');
+      _userName = null;
     }
     notifyListeners();
   }
@@ -48,6 +55,10 @@ class AuthRepository extends ChangeNotifier {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['token'] != null) {
+        if (data['user'] != null && data['user']['name'] != null) {
+          _userName = data['user']['name'];
+          await _prefs.setString('user_name', _userName!);
+        }
         await _setToken(data['token']);
         return null;
       }

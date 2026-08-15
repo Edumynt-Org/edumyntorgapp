@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 class AppTextField extends StatefulWidget {
   final String label;
@@ -45,7 +46,9 @@ class _AppTextFieldState extends State<AppTextField> {
             ? IconButton(
                 icon: Icon(
                   _obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? AppColors.textMutedLight
+                      : AppColors.textMutedDark,
                 ),
                 onPressed: () {
                   setState(() {
