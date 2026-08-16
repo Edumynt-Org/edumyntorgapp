@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers.dart';
 import '../../../../core/network/catalog_models.dart';
 import '../../../../core/theme/app_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/widgets/skeleton_shimmer.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_radius.dart';
 
 class BookDetailScreen extends ConsumerStatefulWidget {
   final String slug;
@@ -146,44 +150,175 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
   }
 
   void _showDownloadsModal() {
-    // Placeholder for download functionality
+    if (_bundle == null) return;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? AppColors.textDark : AppColors.textLight;
+    final mutedColor = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
+    
+    final hasAnyDownloads = _bundle!.editions.any((e) => e.downloadLinks.isNotEmpty);
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
+      isScrollControlled: true,
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Downloads',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        color: isDark ? AppColors.textDark : AppColors.textLight,
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.8,
+          expand: false,
+          builder: (context, scrollController) {
+            return SafeArea(
+              child: Column(
+                children: [
+                  // Handle bar
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.sm),
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: mutedColor.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                  ),
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.md, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Downloads',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: textColor,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Icon(Icons.download_for_offline, size: 64, color: AppColors.textMutedLight),
-                const SizedBox(height: 16),
-                const Text('Download options will appear here.', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 24),
-              ],
+                  ),
+                  const Divider(),
+                  // Content
+                  Expanded(
+                    child: hasAnyDownloads
+                        ? ListView.builder(
+                            controller: scrollController,
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                            itemCount: _bundle!.editions.length,
+                            itemBuilder: (context, index) {
+                              final edition = _bundle!.editions[index];
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.sm),
+                                    child: Text(
+                                      edition.title,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w900,
+                                        color: textColor,
+                                      ),
+                                    ),
+                                  ),
+                                  if (edition.downloadLinks.isEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                                      child: Text(
+                                        'No downloads available',
+                                        style: TextStyle(color: mutedColor, fontStyle: FontStyle.italic),
+                                      ),
+                                    )
+                                  else
+                                    ...edition.downloadLinks.map((link) {
+                                      IconData icon;
+                                      switch (link.type) {
+                                        case 'pdf': icon = Icons.picture_as_pdf; break;
+                                        case 'epub': icon = Icons.book; break;
+                                        case 'mobi': icon = Icons.phone_android; break;
+                                        default: icon = Icons.download; break;
+                                      }
+                                      return ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        leading: Container(
+                                          padding: const EdgeInsets.all(AppSpacing.sm),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(AppRadius.md),
+                                          ),
+                                          child: Icon(icon, color: Theme.of(context).colorScheme.primary),
+                                        ),
+                                        title: Text(
+                                          link.label,
+                                          style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+                                        ),
+                                        subtitle: Text(
+                                          link.url,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(fontSize: 12, color: mutedColor),
+                                        ),
+                                        trailing: Icon(Icons.open_in_new, size: 18, color: mutedColor),
+                                        onTap: () {
+                                          launchUrl(Uri.parse(link.url), mode: LaunchMode.externalApplication);
+                                        },
+                                      );
+                                    }),
+                                  if (index < _bundle!.editions.length - 1)
+                                    Divider(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+                                ],
+                              );
+                            },
+                          )
+                        : Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.download_for_offline, size: 64, color: mutedColor),
+                                const SizedBox(height: AppSpacing.md),
+                                Text(
+                                  'No downloads available',
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: mutedColor),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showCoverDialog(BookModel book) {
+    if (book.coverUrl == null || book.coverUrl!.isEmpty) return;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(AppSpacing.lg),
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Hero(
+              tag: 'book-cover-fullscreen-${book.slug}',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                child: Image.network(book.coverUrl!, fit: BoxFit.contain),
+              ),
             ),
           ),
         );
@@ -336,7 +471,7 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
       return Scaffold(
         backgroundColor: bgColor,
         appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, leading: const BackButton()),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const BookDetailSkeleton(),
       );
     }
 
@@ -395,28 +530,34 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                   child: Column(
                     children: [
                       // Cover
-                      Container(
-                        width: 160,
-                        height: 240,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: book.coverUrl != null && book.coverUrl!.isNotEmpty
-                              ? Image.network(book.coverUrl!, fit: BoxFit.cover)
-                              : Container(
-                                  color: isDark ? AppColors.surfaceDark : Colors.white,
-                                  alignment: Alignment.center,
-                                  child: Text(book.title, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+                      Hero(
+                        tag: 'book-cover-${book.slug}',
+                        child: GestureDetector(
+                          onTap: () => _showCoverDialog(book),
+                          child: Container(
+                            width: 160,
+                            height: 240,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
                                 ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                                  ? Image.network(book.coverUrl!, fit: BoxFit.cover)
+                                  : Container(
+                                      color: isDark ? AppColors.surfaceDark : Colors.white,
+                                      alignment: Alignment.center,
+                                      child: Text(book.title, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+                                    ),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -433,15 +574,25 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      if (_bundle!.authors.isNotEmpty)
-                        Text(
-                          _bundle!.authors.join(', '),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                      if (_bundle!.authorDetails.isNotEmpty)
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          children: _bundle!.authorDetails.map((author) {
+                            final isLast = author == _bundle!.authorDetails.last;
+                            return GestureDetector(
+                              onTap: () => context.push('/person/${author.slug}'),
+                              child: Text(
+                                isLast ? author.name : '${author.name}, ',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       
                       const SizedBox(height: 12),

@@ -95,12 +95,37 @@ class BookListModel {
   }
 }
 
+/// A download link attached to an edition (epub, pdf, mobi, etc.)
+class DownloadLinkModel {
+  final String type;
+  final String url;
+
+  DownloadLinkModel({required this.type, required this.url});
+
+  factory DownloadLinkModel.fromJson(Map<String, dynamic> json) {
+    return DownloadLinkModel(
+      type: json['type'] ?? 'other',
+      url: json['url'] ?? '',
+    );
+  }
+
+  String get label {
+    switch (type) {
+      case 'epub': return 'EPUB';
+      case 'pdf': return 'PDF';
+      case 'mobi': return 'MOBI';
+      default: return 'Download';
+    }
+  }
+}
+
 class EditionModel {
   final String id;
   final String slug;
   final String title;
   final String? sourceName;
   final String? rightsStatus;
+  final List<DownloadLinkModel> downloadLinks;
 
   EditionModel({
     required this.id,
@@ -108,15 +133,25 @@ class EditionModel {
     required this.title,
     this.sourceName,
     this.rightsStatus,
+    this.downloadLinks = const [],
   });
 
   factory EditionModel.fromJson(Map<String, dynamic> json) {
+    List<DownloadLinkModel> links = [];
+    if (json['download_links'] != null && json['download_links'] is List) {
+      links = (json['download_links'] as List)
+          .where((l) => l is Map<String, dynamic>)
+          .map((l) => DownloadLinkModel.fromJson(l))
+          .toList();
+    }
+
     return EditionModel(
       id: json['id'],
-      slug: json['slug'] ?? json['id'], // fallback
+      slug: json['slug'] ?? json['id'],
       title: json['title'],
       sourceName: json['source_name'],
       rightsStatus: json['rights_status'],
+      downloadLinks: links,
     );
   }
 }
@@ -141,18 +176,116 @@ class TocItemModel {
   });
 }
 
+/// Lightweight author info for display + navigation
+class AuthorInfo {
+  final String id;
+  final String name;
+  final String slug;
+
+  AuthorInfo({required this.id, required this.name, required this.slug});
+}
+
+/// Full person detail for the person screen
+class PersonModel {
+  final String id;
+  final String name;
+  final String slug;
+  final String? bio;
+  final String? photoUrl;
+  final int? birthYear;
+  final int? deathYear;
+  final String? websiteUrl;
+  final String? wikipediaUrl;
+  final List<String> alternateNames;
+
+  PersonModel({
+    required this.id,
+    required this.name,
+    required this.slug,
+    this.bio,
+    this.photoUrl,
+    this.birthYear,
+    this.deathYear,
+    this.websiteUrl,
+    this.wikipediaUrl,
+    this.alternateNames = const [],
+  });
+
+  factory PersonModel.fromJson(Map<String, dynamic> json) {
+    // Extract bio text from Lexical JSON
+    String? bioText;
+    if (json['bio'] != null && json['bio'] is Map) {
+      final root = json['bio']['root'];
+      if (root != null && root['children'] != null) {
+        List<String> paragraphs = [];
+        for (var node in root['children']) {
+          if (node['children'] != null) {
+            String paragraph = '';
+            for (var child in node['children']) {
+              if (child['text'] != null) {
+                paragraph += child['text'];
+              }
+            }
+            if (paragraph.isNotEmpty) paragraphs.add(paragraph);
+          }
+        }
+        bioText = paragraphs.join('\n\n');
+      }
+    }
+
+    // Photo URL
+    String? photoUrl;
+    if (json['photo'] != null && json['photo'] is Map) {
+      photoUrl = json['photo']['url'];
+    }
+
+    // Alternate names
+    List<String> altNames = [];
+    if (json['alternate_names'] != null && json['alternate_names'] is List) {
+      altNames = (json['alternate_names'] as List)
+          .where((a) => a is Map && a['name'] != null)
+          .map<String>((a) => a['name'] as String)
+          .toList();
+    }
+
+    return PersonModel(
+      id: json['id'],
+      name: json['name'],
+      slug: json['slug'],
+      bio: bioText,
+      photoUrl: photoUrl,
+      birthYear: json['birth_year'],
+      deathYear: json['death_year'],
+      websiteUrl: json['website_url'],
+      wikipediaUrl: json['wikipedia_url'],
+      alternateNames: altNames,
+    );
+  }
+
+  /// Formatted lifespan string, e.g. "1828 – 1910"
+  String? get lifespan {
+    if (birthYear == null && deathYear == null) return null;
+    final birth = birthYear?.toString() ?? '?';
+    final death = deathYear?.toString() ?? 'present';
+    return '$birth – $death';
+  }
+}
+
 class BookDetailBundle {
   final BookModel book;
-  final List<String> authors;
+  final List<AuthorInfo> authorDetails;
   final List<String> genres;
   final List<EditionModel> editions;
   final Map<String, List<TocItemModel>> editionStructures;
 
   BookDetailBundle({
     required this.book,
-    this.authors = const [],
+    this.authorDetails = const [],
     this.genres = const [],
     this.editions = const [],
     this.editionStructures = const {},
   });
+
+  /// Convenience: list of author display names
+  List<String> get authors => authorDetails.map((a) => a.name).toList();
 }

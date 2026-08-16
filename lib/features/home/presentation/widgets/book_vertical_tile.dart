@@ -25,35 +25,38 @@ class BookVerticalTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Cover
-            Container(
-              width: 80,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-                image: book.coverUrl != null && book.coverUrl!.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(book.coverUrl!),
-                        fit: BoxFit.cover,
+            Hero(
+              tag: 'book-cover-${book.slug}',
+              child: Container(
+                width: 80,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                  image: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(book.coverUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: (book.coverUrl == null || book.coverUrl!.isEmpty)
+                    ? Center(
+                        child: Icon(
+                          Icons.book_rounded,
+                          color: mutedColor,
+                          size: 30,
+                        ),
                       )
                     : null,
               ),
-              child: (book.coverUrl == null || book.coverUrl!.isEmpty)
-                  ? Center(
-                      child: Icon(
-                        Icons.book_rounded,
-                        color: mutedColor,
-                        size: 30,
-                      ),
-                    )
-                  : null,
             ),
             const SizedBox(width: 16),
             // Details

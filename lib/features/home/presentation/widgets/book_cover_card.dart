@@ -23,35 +23,38 @@ class BookCoverCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Cover
-            Container(
-              width: 140,
-              height: 210,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-                image: book.coverUrl != null && book.coverUrl!.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(book.coverUrl!),
-                        fit: BoxFit.cover,
+            Hero(
+              tag: 'book-cover-${book.slug}',
+              child: Container(
+                width: 140,
+                height: 210,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                  image: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(book.coverUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: (book.coverUrl == null || book.coverUrl!.isEmpty)
+                    ? Center(
+                        child: Icon(
+                          Icons.book_rounded,
+                          color: mutedColor,
+                          size: 40,
+                        ),
                       )
                     : null,
               ),
-              child: (book.coverUrl == null || book.coverUrl!.isEmpty)
-                  ? Center(
-                      child: Icon(
-                        Icons.book_rounded,
-                        color: mutedColor,
-                        size: 40,
-                      ),
-                    )
-                  : null,
             ),
             const SizedBox(height: 8),
             // Title

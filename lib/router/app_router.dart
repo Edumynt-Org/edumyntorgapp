@@ -11,6 +11,7 @@ import '../features/books/presentation/screens/book_detail_screen.dart';
 import '../features/profile/presentation/screens/profile_screen.dart';
 import '../features/reader/presentation/screens/reader_screen.dart';
 import '../core/widgets/scaffold_with_nav.dart';
+import '../features/people/presentation/screens/person_detail_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(
@@ -54,6 +55,11 @@ final appRouter = GoRouter(
         editionId: state.pathParameters['editionSlug']!,
         chapterId: state.pathParameters['chapterSlug']!,
       ),
+    ),
+    GoRoute(
+      path: '/person/:slug',
+      builder: (context, state) =>
+          PersonDetailScreen(slug: state.pathParameters['slug']!),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

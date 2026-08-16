@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers.dart';
 import '../../../../core/network/catalog_models.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/skeleton_shimmer.dart';
 
 class BooksScreen extends ConsumerStatefulWidget {
   const BooksScreen({super.key});
@@ -118,7 +119,7 @@ class _BooksScreenState extends ConsumerState<BooksScreen> {
           const SizedBox(height: 16),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const BookGridSkeleton(count: 9)
                 : _books.isEmpty
                 ? _buildEmptyState(isDark)
                 : _buildGrid(isDark),
@@ -245,16 +246,19 @@ class _BooksScreenState extends ConsumerState<BooksScreen> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: book.coverUrl != null && book.coverUrl!.isNotEmpty
-                          ? Image.network(
-                              book.coverUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  _buildPlaceholder(book.title),
-                            )
-                          : _buildPlaceholder(book.title),
+                    child: Hero(
+                      tag: 'book-cover-${book.slug}',
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                            ? Image.network(
+                                book.coverUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildPlaceholder(book.title),
+                              )
+                            : _buildPlaceholder(book.title),
+                      ),
                     ),
                   ),
                   Positioned(
