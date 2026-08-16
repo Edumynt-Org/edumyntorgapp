@@ -4,7 +4,6 @@ class BookModel {
   final String slug;
   final String? coverUrl;
 
-  // Extended fields for detail view
   final String? description;
   final int? firstPublishedYear;
   final String? originalLanguage;
@@ -32,7 +31,6 @@ class BookModel {
       }
     }
 
-    // Parse lexical description
     String? descText;
     if (json['description'] != null && json['description'] is Map) {
       final root = json['description']['root'];
@@ -101,7 +99,6 @@ class EditionModel {
   final String id;
   final String slug;
   final String title;
-  final bool isAudio;
   final String? sourceName;
   final String? rightsStatus;
 
@@ -109,20 +106,15 @@ class EditionModel {
     required this.id,
     required this.slug,
     required this.title,
-    this.isAudio = false,
     this.sourceName,
     this.rightsStatus,
   });
 
-  factory EditionModel.fromJson(
-    Map<String, dynamic> json, {
-    bool isAudio = false,
-  }) {
+  factory EditionModel.fromJson(Map<String, dynamic> json) {
     return EditionModel(
       id: json['id'],
       slug: json['slug'] ?? json['id'], // fallback
       title: json['title'],
-      isAudio: isAudio,
       sourceName: json['source_name'],
       rightsStatus: json['rights_status'],
     );
@@ -133,15 +125,19 @@ class TocItemModel {
   final String id;
   final String title;
   final String type; // 'part' or 'chapter'
+  final String? chapterType;
   final int sortOrder;
   final List<TocItemModel>? chapters; // Only if type == 'part'
+  final bool hasAudio;
 
   TocItemModel({
     required this.id,
     required this.title,
     required this.type,
+    this.chapterType,
     required this.sortOrder,
     this.chapters,
+    this.hasAudio = false,
   });
 }
 
@@ -149,20 +145,14 @@ class BookDetailBundle {
   final BookModel book;
   final List<String> authors;
   final List<String> genres;
-  final List<EditionModel> textEditions;
-  final List<EditionModel> audioEditions;
-  final Map<String, List<TocItemModel>> textEditionStructures;
-  final Map<String, List<TocItemModel>> audioEditionStructures;
-  final Map<String, String> audioNarrators;
+  final List<EditionModel> editions;
+  final Map<String, List<TocItemModel>> editionStructures;
 
   BookDetailBundle({
     required this.book,
     this.authors = const [],
     this.genres = const [],
-    this.textEditions = const [],
-    this.audioEditions = const [],
-    this.textEditionStructures = const {},
-    this.audioEditionStructures = const {},
-    this.audioNarrators = const {},
+    this.editions = const [],
+    this.editionStructures = const {},
   });
 }

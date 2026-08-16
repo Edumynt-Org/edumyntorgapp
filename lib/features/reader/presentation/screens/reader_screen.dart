@@ -51,8 +51,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       setState(() {
         if (bundle != null) {
           _toc =
-              bundle.textEditionStructures[widget.editionId] ??
-              bundle.audioEditionStructures[widget.editionId] ??
+              bundle.editionStructures[widget.editionId] ??
               [];
         }
         _chapterContent = content;

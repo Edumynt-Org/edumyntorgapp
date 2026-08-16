@@ -14,17 +14,11 @@ class BookDetailScreen extends ConsumerStatefulWidget {
   ConsumerState<BookDetailScreen> createState() => _BookDetailScreenState();
 }
 
-class _BookDetailScreenState extends ConsumerState<BookDetailScreen>
-    with TickerProviderStateMixin {
+class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
   bool _isLoading = true;
   BookDetailBundle? _bundle;
-  TabController? _tabController;
-
-  String? _selectedTextEditionId;
-  String? _selectedAudioEditionId;
-  String _detailsViewId = 'book';
-
-  List<String> _tabs = [];
+  String? _selectedEditionId;
+  bool _descriptionExpanded = false;
 
   @override
   void initState() {
@@ -37,21 +31,10 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen>
     final bundle = await repo.getBookDetails(widget.slug);
 
     if (mounted && bundle != null) {
-      _tabs = [];
-      if (bundle.textEditions.isNotEmpty) _tabs.add('Read');
-      if (bundle.audioEditions.isNotEmpty) _tabs.add('Listen');
-      _tabs.add('Details');
-      _tabs.add('Reviews');
-
-      _tabController = TabController(length: _tabs.length, vsync: this);
-
       setState(() {
         _bundle = bundle;
-        if (bundle.textEditions.isNotEmpty) {
-          _selectedTextEditionId = bundle.textEditions.first.slug;
-        }
-        if (bundle.audioEditions.isNotEmpty) {
-          _selectedAudioEditionId = bundle.audioEditions.first.slug;
+        if (bundle.editions.isNotEmpty) {
+          _selectedEditionId = bundle.editions.first.slug;
         }
         _isLoading = false;
       });
@@ -62,1030 +45,616 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen>
     }
   }
 
-  @override
-  void dispose() {
-    _tabController?.dispose();
-    super.dispose();
+  bool _currentEditionHasAudio() {
+    if (_bundle == null || _selectedEditionId == null) return false;
+    final toc = _bundle!.editionStructures[_selectedEditionId] ?? <TocItemModel>[];
+    
+    // Check if any chapter has audio
+    for (var item in toc) {
+      if (item.type == 'chapter' && item.hasAudio) return true;
+      if (item.type == 'part' && item.chapters != null) {
+        for (var ch in item.chapters!) {
+          if (ch.hasAudio) return true;
+        }
+      }
+    }
+    return false;
   }
 
-  void _showDescriptionModal(BuildContext context, bool isDark) {
-    if (_bundle == null) return;
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        fullscreenDialog: true,
-        builder: (BuildContext context) {
-          return Scaffold(
-            backgroundColor: isDark
-                ? AppColors.surfaceDark
-                : AppColors.backgroundLight,
-            appBar: AppBar(
-              backgroundColor: isDark
-                  ? AppColors.surfaceDark
-                  : AppColors.backgroundLight,
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(
-                  Icons.close,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-                onPressed: () => Navigator.pop(context),
-              ),
-              title: Text(
-                'About this book',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-            ),
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _bundle!.book.title,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
+  void _showEditionSelector() {
+    if (_bundle == null || _bundle!.editions.length <= 1) return;
+    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Select Edition',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: isDark ? AppColors.textDark : AppColors.textLight,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
                   ),
-                  if (_bundle!.authors.isNotEmpty) ...[
-                    SizedBox(height: 8),
-                    Text(
-                      'by ${_bundle!.authors.join(', ')}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isDark
-                            ? AppColors.textMutedDark
-                            : AppColors.textMutedLight,
+                ),
+                const SizedBox(height: 12),
+                ..._bundle!.editions.map((edition) {
+                  final isSelected = edition.slug == _selectedEditionId;
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedEditionId = edition.slug;
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1) 
+                          : Colors.transparent,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              edition.title,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: isSelected ? FontWeight.w900 : FontWeight.bold,
+                                color: isSelected 
+                                    ? Theme.of(context).colorScheme.primary 
+                                    : (isDark ? AppColors.textDark : AppColors.textLight),
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary),
+                        ],
                       ),
                     ),
-                  ],
-                  SizedBox(height: 24),
-                  Text(
-                    _bundle!.book.description ?? '',
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 1.6,
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.9)
-                          : Colors.black87,
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDownloadsModal() {
+    // Placeholder for download functionality
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Downloads',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? AppColors.textDark : AppColors.textLight,
+                      ),
                     ),
-                  ),
-                ],
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Icon(Icons.download_for_offline, size: 64, color: AppColors.textMutedLight),
+                const SizedBox(height: 16),
+                const Text('Download options will appear here.', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _toRoman(int num) {
+    final values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+    final numerals = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
+    String result = "";
+    for (int i = 0; i < values.length; i++) {
+      while (num >= values[i]) {
+        num -= values[i];
+        result += numerals[i];
+      }
+    }
+    return result.isEmpty ? "0" : result;
+  }
+
+  List<Widget> _buildTocList(List<TocItemModel> toc, bool isDark) {
+    List<Widget> widgets = [];
+    int standaloneChapterCount = 1;
+    int partCount = 1;
+
+    for (int i = 0; i < toc.length; i++) {
+      final item = toc[i];
+      
+      if (item.type == 'part') {
+        final title = 'Part $partCount: ${item.title}';
+        partCount++;
+        widgets.add(_buildPartHeader(title, isDark));
+        
+        if (item.chapters != null) {
+          int partChapterCount = 1;
+          for (int j = 0; j < item.chapters!.length; j++) {
+            final ch = item.chapters![j];
+            final isRealChapter = ch.chapterType == null || ch.chapterType == 'chapter';
+            
+            String prefix = '';
+            if (isRealChapter) {
+              prefix = '${_toRoman(partChapterCount)}. ';
+              partChapterCount++;
+            }
+            
+            widgets.add(_buildChapterRow(
+              ch, 
+              isDark, 
+              displayTitle: '$prefix${ch.title}', 
+              isLast: j == item.chapters!.length - 1 && i == toc.length - 1,
+              isIndented: true,
+            ));
+          }
+        }
+      } else {
+        final isRealChapter = item.chapterType == null || item.chapterType == 'chapter';
+        String prefix = '';
+        if (isRealChapter) {
+          prefix = '$standaloneChapterCount. ';
+          standaloneChapterCount++;
+        }
+        
+        widgets.add(_buildChapterRow(
+          item, 
+          isDark, 
+          displayTitle: '$prefix${item.title}',
+          isLast: i == toc.length - 1,
+          isIndented: false,
+        ));
+      }
+    }
+    
+    return widgets;
+  }
+
+  Widget _buildPartHeader(String title, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24, bottom: 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w900,
+          color: isDark ? AppColors.textDark : AppColors.textLight,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChapterRow(TocItemModel chapter, bool isDark, {required String displayTitle, bool isFirst = false, bool isLast = false, bool isIndented = false}) {
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    
+    Widget content = Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        border: isLast ? null : Border(bottom: BorderSide(color: borderColor)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              displayTitle,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? AppColors.textDark : AppColors.textLight,
               ),
             ),
-          );
-        },
+          ),
+          if (chapter.hasAudio)
+            Container(
+              margin: const EdgeInsets.only(left: 12),
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.headphones, 
+                size: 16, 
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+        ],
       ),
+    );
+
+    if (isIndented) {
+      content = Padding(
+        padding: const EdgeInsets.only(left: 16.0), // Indent for chapters inside parts
+        child: content,
+      );
+    }
+
+    return InkWell(
+      onTap: () {
+        context.push('/book/${widget.slug}/$_selectedEditionId/${chapter.id}');
+      },
+      child: content,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
+    final textColor = isDark ? AppColors.textDark : AppColors.textLight;
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(leading: const BackButton()),
-        body: Center(child: CircularProgressIndicator()),
+        backgroundColor: bgColor,
+        appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, leading: const BackButton()),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_bundle == null) {
       return Scaffold(
-        appBar: AppBar(leading: const BackButton()),
+        backgroundColor: bgColor,
+        appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, leading: const BackButton()),
         body: Center(
-          child: Text(
-            'Book not found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
+          child: Text('Book not found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
         ),
       );
     }
 
+    final book = _bundle!.book;
+    final hasAudio = _currentEditionHasAudio();
+    final List<TocItemModel> toc = _selectedEditionId != null ? (_bundle!.editionStructures[_selectedEditionId] ?? <TocItemModel>[]) : <TocItemModel>[];
+
     return Scaffold(
-      body: SafeArea(
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              // Floating Action Buttons (AppBar)
+      backgroundColor: bgColor,
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              // 1. Transparent App Bar
               SliverAppBar(
-                floating: true,
                 pinned: true,
-                backgroundColor: isDark
-                    ? AppColors.backgroundDark
-                    : AppColors.backgroundLight,
+                backgroundColor: bgColor,
                 elevation: 0,
                 scrolledUnderElevation: 0,
-                leading: IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.surfaceDark.withValues(alpha: 0.8)
-                          : Colors.white.withValues(alpha: 0.8),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: isDark ? Colors.white : Colors.black,
-                      size: 20,
-                    ),
+                leading: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back, color: textColor),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  onPressed: () => Navigator.pop(context),
                 ),
                 actions: [
                   IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.surfaceDark.withValues(alpha: 0.8)
-                            : Colors.white.withValues(alpha: 0.8),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text('🔖', style: TextStyle(fontSize: 16)),
-                    ),
+                    icon: Icon(Icons.share_outlined, color: textColor),
                     onPressed: () {},
                   ),
-                  IconButton(
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.surfaceDark.withValues(alpha: 0.8)
-                            : Colors.white.withValues(alpha: 0.8),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text('⋯', style: TextStyle(fontSize: 16)),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: IconButton(
+                      icon: Icon(Icons.file_download_outlined, color: textColor),
+                      onPressed: _showDownloadsModal,
                     ),
-                    onPressed: () {},
                   ),
-                  SizedBox(width: 8),
                 ],
               ),
-
-              // Side-by-side Hero Section
+              
+              // 2. Hero Section
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  child: Column(
                     children: [
                       // Cover
                       Container(
-                        width: 120,
-                        height: 180,
+                        width: 160,
+                        height: 240,
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? AppColors.surfaceDark
-                              : AppColors.backgroundLight,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isDark
-                                ? AppColors.borderDark
-                                : AppColors.borderLight,
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(11),
-                          child:
-                              _bundle!.book.coverUrl != null &&
-                                  _bundle!.book.coverUrl!.isNotEmpty
-                              ? Image.network(
-                                  _bundle!.book.coverUrl!,
-                                  fit: BoxFit.cover,
-                                )
-                              : Center(
-                                  child: Text(
-                                    _bundle!.book.title,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                      // Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _bundle!.book.title,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                height: 1.1,
-                                color: isDark ? Colors.white : Colors.black,
-                              ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
-                            if (_bundle!.authors.isNotEmpty) ...[
-                              SizedBox(height: 4),
-                              Text(
-                                'by ${_bundle!.authors.join(', ')}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark
-                                      ? AppColors.textMutedDark
-                                      : AppColors.textMutedLight,
-                                ),
-                              ),
-                            ],
-                            SizedBox(height: 12),
-                            // Badges
-                            Wrap(
-                              spacing: 6,
-                              runSpacing: 6,
-                              children: [
-                                if (_bundle!.textEditions.isNotEmpty)
-                                  _buildBadge(
-                                    '📖 ${_bundle!.textEditions.length} Edition${_bundle!.textEditions.length > 1 ? 's' : ''}',
-                                    isDark,
-                                  ),
-                                if (_bundle!.audioEditions.isNotEmpty)
-                                  _buildBadge(
-                                    '🎧 ${_bundle!.audioEditions.length} Audio',
-                                    isDark,
-                                  ),
-                              ],
-                            ),
-                            if (_bundle!.book.description != null &&
-                                _bundle!.book.description!.isNotEmpty) ...[
-                              SizedBox(height: 12),
-                              Text(
-                                _bundle!.book.description!,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  height: 1.4,
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.8)
-                                      : Colors.black87,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () =>
-                                    _showDescriptionModal(context, isDark),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    'Read more',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
                           ],
                         ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                              ? Image.network(book.coverUrl!, fit: BoxFit.cover)
+                              : Container(
+                                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                                  alignment: Alignment.center,
+                                  child: Text(book.title, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+                                ),
+                        ),
                       ),
+                      const SizedBox(height: 24),
+                      
+                      // Metadata
+                      Text(
+                        book.title,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          height: 1.1,
+                          color: textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (_bundle!.authors.isNotEmpty)
+                        Text(
+                          _bundle!.authors.join(', '),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (book.firstPublishedYear != null) ...[
+                            Text(
+                              book.firstPublishedYear.toString(),
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
+                            ),
+                            const SizedBox(width: 12),
+                            Text('•', style: TextStyle(color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight)),
+                            const SizedBox(width: 12),
+                          ],
+                          if (book.originalLanguage != null)
+                            Text(
+                              book.originalLanguage!,
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
+                            ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 24),
+                      
+                      // Description
+                      if (book.description != null && book.description!.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _descriptionExpanded = !_descriptionExpanded;
+                            });
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              AnimatedCrossFade(
+                                duration: const Duration(milliseconds: 300),
+                                crossFadeState: _descriptionExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                                firstChild: ShaderMask(
+                                  shaderCallback: (rect) {
+                                    return LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [Colors.black, Colors.transparent],
+                                      stops: const [0.5, 1.0],
+                                    ).createShader(rect);
+                                  },
+                                  blendMode: BlendMode.dstIn,
+                                  child: Text(
+                                    book.description!,
+                                    maxLines: 3,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      height: 1.5,
+                                      color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                                    ),
+                                  ),
+                                ),
+                                secondChild: Text(
+                                  book.description!,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    height: 1.5,
+                                    color: isDark ? AppColors.textDark : AppColors.textLight,
+                                  ),
+                                ),
+                              ),
+                              if (!_descriptionExpanded)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    'Read more',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
               ),
 
-              // Sticky Tabs
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _SliverAppBarDelegate(
-                  TabBar(
-                    controller: _tabController,
-                    isScrollable: false,
-                    labelColor: Theme.of(context).colorScheme.primary,
-                    unselectedLabelColor: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                    indicatorColor: Theme.of(context).colorScheme.primary,
-                    indicatorWeight: 3,
-                    labelStyle: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14,
-                    ),
-                    unselectedLabelStyle: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    tabs: _tabs.map((t) {
-                      String icon = '';
-                      if (t == 'Read') icon = '📖 ';
-                      if (t == 'Listen') icon = '🎧 ';
-                      return Tab(text: '$icon$t');
-                    }).toList(),
-                  ),
-                  isDark,
-                ),
-              ),
-            ];
-          },
-          body: TabBarView(
-            controller: _tabController,
-            children: _tabs.map((tab) {
-              if (tab == 'Read') return _buildReadTab(isDark);
-              if (tab == 'Listen') return _buildListenTab(isDark);
-              if (tab == 'Details') return _buildDetailsTab(isDark);
-              return _buildReviewsTab(isDark);
-            }).toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBadge(String text, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: isDark ? Colors.white : Colors.black,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditionSwitcher(
-    List<EditionModel> editions,
-    String selectedId,
-    Function(String) onSelect,
-    bool isDark,
-  ) {
-    if (editions.length <= 1) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: editions.map((ed) {
-          final isSelected = ed.id == selectedId;
-          return GestureDetector(
-            onTap: () => onSelect(ed.id),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.1)
-                    : (isDark
-                          ? AppColors.surfaceDark
-                          : AppColors.backgroundLight),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: 0.5)
-                      : (isDark ? AppColors.borderDark : AppColors.borderLight),
-                ),
-              ),
-              child: Text(
-                ed.title,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : (isDark ? Colors.white : Colors.black),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildReadTab(bool isDark) {
-    final structures =
-        _bundle!.textEditionStructures[_selectedTextEditionId] ?? [];
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              _buildEditionSwitcher(
-                _bundle!.textEditions,
-                _selectedTextEditionId!,
-                (slug) => setState(() => _selectedTextEditionId = slug),
-                isDark,
-              ),
-              TocAccordionWidget(items: structures, isDark: isDark),
-            ],
-          ),
-        ),
-        _buildStickyCTA(
-          'Start Reading',
-          Theme.of(context).colorScheme.primary,
-          isDark,
-          _selectedTextEditionId,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildListenTab(bool isDark) {
-    final structures =
-        _bundle!.audioEditionStructures[_selectedAudioEditionId] ?? [];
-    final narrator = _bundle!.audioNarrators[_selectedAudioEditionId];
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              _buildEditionSwitcher(
-                _bundle!.audioEditions,
-                _selectedAudioEditionId!,
-                (slug) => setState(() => _selectedAudioEditionId = slug),
-                isDark,
-              ),
-              if (narrator != null) ...[
-                Text(
-                  '🎙️ Narrated by $narrator',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                  ),
-                ),
-                SizedBox(height: 16),
-              ],
-              TocAccordionWidget(items: structures, isDark: isDark),
-            ],
-          ),
-        ),
-        _buildStickyCTA(
-          'Start Listening',
-          Theme.of(context).colorScheme.secondary,
-          isDark,
-          _selectedAudioEditionId,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailsTab(bool isDark) {
-    final allEditions = [
-      ..._bundle!.textEditions.map(
-        (e) => {'id': e.id, 'title': e.title, 'type': 'text'},
-      ),
-      ..._bundle!.audioEditions.map(
-        (e) => {'id': e.id, 'title': e.title, 'type': 'audio'},
-      ),
-    ];
-
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _buildDetailSwitcherTab('book', '📚 Book Details', isDark),
-            ...allEditions.map(
-              (e) => _buildDetailSwitcherTab(
-                e['id'] as String,
-                '${e['type'] == 'audio' ? '🎧' : '📖'} ${e['title']}',
-                isDark,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 24),
-        if (_detailsViewId == 'book') ...[
-          _buildDetailRow(
-            'First Published',
-            _bundle!.book.firstPublishedYear?.toString(),
-            isDark,
-          ),
-          _buildDetailRow(
-            'Original Language',
-            _bundle!.book.originalLanguage,
-            isDark,
-          ),
-          if (_bundle!.genres.isNotEmpty) ...[
-            SizedBox(height: 12),
-            Text(
-              'Genres',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: isDark
-                    ? AppColors.textMutedDark
-                    : AppColors.textMutedLight,
-              ),
-            ),
-            SizedBox(height: 4),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _bundle!.genres
-                  .map((g) => _buildBadge(g, isDark))
-                  .toList(),
-            ),
-          ],
-        ] else
-          ...(() {
-            final edText = _bundle!.textEditions
-                .where((e) => e.id == _detailsViewId)
-                .toList();
-            final edAudio = _bundle!.audioEditions
-                .where((e) => e.id == _detailsViewId)
-                .toList();
-            if (edText.isNotEmpty) {
-              final e = edText.first;
-              return [
-                _buildDetailRow('Title', e.title, isDark),
-                _buildDetailRow('Format', 'Ebook', isDark),
-                _buildDetailRow('Source', e.sourceName, isDark),
-                _buildDetailRow(
-                  'Rights',
-                  e.rightsStatus?.replaceAll('_', ' '),
-                  isDark,
-                ),
-              ];
-            } else if (edAudio.isNotEmpty) {
-              final e = edAudio.first;
-              return [
-                _buildDetailRow('Title', e.title, isDark),
-                _buildDetailRow('Format', 'Audiobook', isDark),
-                _buildDetailRow('Source', e.sourceName, isDark),
-                _buildDetailRow(
-                  'Rights',
-                  e.rightsStatus?.replaceAll('_', ' '),
-                  isDark,
-                ),
-              ];
-            }
-            return <Widget>[];
-          }()),
-      ],
-    );
-  }
-
-  Widget _buildDetailSwitcherTab(String id, String label, bool isDark) {
-    final isSelected = _detailsViewId == id;
-    return GestureDetector(
-      onTap: () => setState(() => _detailsViewId = id),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-              : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
-                : (isDark ? AppColors.borderDark : AppColors.borderLight),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : (isDark ? Colors.white : Colors.black),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String? value, bool isDark) {
-    if (value == null || value.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: isDark
-                  ? AppColors.textMutedDark
-                  : AppColors.textMutedLight,
-            ),
-          ),
-          SizedBox(height: 2),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReviewsTab(bool isDark) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('⭐', style: TextStyle(fontSize: 48)),
-          SizedBox(height: 16),
-          Text(
-            'Reviews Coming Soon',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'We\'re building something special.',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: isDark
-                  ? AppColors.textMutedDark
-                  : AppColors.textMutedLight,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStickyCTA(
-    String text,
-    Color color,
-    bool isDark,
-    String? editionId,
-  ) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      child: Material(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: () {
-            if (editionId != null) {
-              final toc =
-                  _bundle!.textEditionStructures[editionId] ??
-                  _bundle!.audioEditionStructures[editionId];
-              String firstChapter = 'c1';
-              if (toc != null && toc.isNotEmpty) {
-                final firstItem = toc.first;
-                if (firstItem.type == 'chapter') {
-                  firstChapter = firstItem.id;
-                } else if (firstItem.chapters != null &&
-                    firstItem.chapters!.isNotEmpty) {
-                  firstChapter = firstItem.chapters!.first.id;
-                }
-              }
-              context.push('/book/${widget.slug}/$editionId/$firstChapter');
-            }
-          },
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            alignment: Alignment.center,
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class TocAccordionWidget extends StatefulWidget {
-  final List<TocItemModel> items;
-  final bool isDark;
-
-  const TocAccordionWidget({
-    super.key,
-    required this.items,
-    required this.isDark,
-  });
-
-  @override
-  State<TocAccordionWidget> createState() => _TocAccordionWidgetState();
-}
-
-class _TocAccordionWidgetState extends State<TocAccordionWidget> {
-  late Set<String> _openParts;
-
-  @override
-  void initState() {
-    super.initState();
-    _openParts = widget.items
-        .where((i) => i.type == 'part')
-        .map((i) => i.id)
-        .toSet();
-  }
-
-  @override
-  void didUpdateWidget(covariant TocAccordionWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.items != widget.items) {
-      _openParts = widget.items
-          .where((i) => i.type == 'part')
-          .map((i) => i.id)
-          .toSet();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.items.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32),
-          child: Column(
-            children: [
-              Text('📄', style: TextStyle(fontSize: 32)),
-              SizedBox(height: 8),
-              Text(
-                'Content coming soon.',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: widget.isDark
-                      ? AppColors.textMutedDark
-                      : AppColors.textMutedLight,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      children: List.generate(widget.items.length, (index) {
-        final item = widget.items[index];
-        final isNextToRead = index == 0;
-
-        if (item.type == 'chapter') {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 4),
-            decoration: BoxDecoration(
-              color: isNextToRead
-                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              border: isNextToRead
-                  ? Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.2),
-                    )
-                  : null,
-            ),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 0,
-              ),
-              dense: true,
-              leading: SizedBox(
-                width: 24,
-                child: Text(
-                  '${index + 1}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isNextToRead
-                        ? Theme.of(context).colorScheme.primary
-                        : (widget.isDark
-                              ? AppColors.textMutedDark
-                              : AppColors.textMutedLight),
-                  ),
-                ),
-              ),
-              title: Text(
-                item.title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: widget.isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              trailing: isNextToRead
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'NEXT',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
+              // 3. Edition Selector
+              if (_bundle!.editions.length > 1)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                    child: InkWell(
+                      onTap: _showEditionSelector,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
                         ),
-                      ),
-                    )
-                  : null,
-            ),
-          );
-        }
-
-        // Part
-        final isOpen = _openParts.contains(item.id);
-        return Column(
-          children: [
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  if (isOpen) {
-                    _openParts.remove(item.id);
-                  } else {
-                    _openParts.add(item.id);
-                  }
-                });
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 4),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 24,
-                      child: Text(
-                        '${index + 1}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: widget.isDark
-                              ? AppColors.textMutedDark
-                              : AppColors.textMutedLight,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      isOpen ? '▾' : '▸',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: widget.isDark
-                            ? AppColors.textMutedDark
-                            : AppColors.textMutedLight,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        item.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 14,
-                          color: widget.isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '${item.chapters?.length ?? 0} chapters',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: widget.isDark
-                            ? AppColors.textMutedDark
-                            : AppColors.textMutedLight,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (isOpen && item.chapters != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 40, bottom: 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      left: BorderSide(
-                        color: widget.isDark
-                            ? AppColors.borderDark
-                            : AppColors.borderLight,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    children: List.generate(item.chapters!.length, (chIdx) {
-                      final ch = item.chapters![chIdx];
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 0,
-                        ),
-                        dense: true,
-                        leading: SizedBox(
-                          width: 20,
-                          child: Text(
-                            '${chIdx + 1}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: widget.isDark
-                                  ? AppColors.textMutedDark
-                                  : AppColors.textMutedLight,
+                        child: Row(
+                          children: [
+                            Icon(Icons.library_books_outlined, size: 20, color: Theme.of(context).colorScheme.primary),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Edition: ${_bundle!.editions.firstWhere((e) => e.slug == _selectedEditionId).title}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                ),
+                              ),
                             ),
-                          ),
+                            Icon(Icons.arrow_drop_down, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
+                          ],
                         ),
-                        title: Text(
-                          ch.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: widget.isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      );
-                    }),
+                      ),
+                    ),
+                  ),
+                ),
+
+              // 4. Content (Chapters List)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 120), // Padding bottom for FAB
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    _buildTocList(toc, isDark),
                   ),
                 ),
               ),
-          ],
-        );
-      }),
+            ],
+          ),
+
+          // 5. Floating Action Buttons
+          Positioned(
+            left: 24,
+            right: 24,
+            bottom: 24,
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _startReading(toc);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      elevation: 8,
+                      shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.menu_book, size: 20),
+                        SizedBox(width: 10),
+                        Text('Read', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+                  ),
+                ),
+                if (hasAudio) ...[
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                         _startReading(toc); // Audio logic to be handled in player
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accentLight, // Gold for audio
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        elevation: 8,
+                        shadowColor: AppColors.accentLight.withValues(alpha: 0.5),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.headphones, size: 20),
+                          SizedBox(width: 10),
+                          Text('Listen', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ]
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
-}
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar _tabBar;
-  final bool _isDark;
-
-  _SliverAppBarDelegate(this._tabBar, this._isDark);
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height + 1.0;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height + 1.0;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      color: _isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      child: Column(children: [_tabBar]),
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
+  void _startReading(List<TocItemModel> toc) {
+    if (_selectedEditionId == null || toc.isEmpty) return;
+    
+    String firstChapter = 'c1';
+    final firstItem = toc.first;
+    if (firstItem.type == 'chapter') {
+      firstChapter = firstItem.id;
+    } else if (firstItem.chapters != null && firstItem.chapters!.isNotEmpty) {
+      firstChapter = firstItem.chapters!.first.id;
+    }
+    
+    context.push('/book/${widget.slug}/$_selectedEditionId/$firstChapter');
   }
 }
