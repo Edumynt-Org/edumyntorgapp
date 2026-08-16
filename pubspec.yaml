@@ -41,6 +41,9 @@ dependencies:
   lottie: ^3.5.1
   flutter_riverpod: ^2.6.1
   flutter_secure_storage: ^11.0.0
+  just_audio: ^0.10.6
+  audio_session: ^0.2.4
+  audio_video_progress_bar: ^2.0.3
 
 dev_dependencies:
   flutter_test:

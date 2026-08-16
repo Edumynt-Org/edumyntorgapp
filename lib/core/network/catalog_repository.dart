@@ -236,23 +236,29 @@ class CatalogRepository {
         final docs = data['docs'] as List;
         if (docs.isNotEmpty) {
           final chapter = docs[0];
-          String extractText(dynamic node) {
-            if (node == null) return '';
-            if (node['text'] != null) return node['text'];
-            if (node['children'] is List) {
-              String result = '';
-              for (var child in node['children']) result += extractText(child);
-              if (node['type'] == 'paragraph') result += '\n\n';
-              return result;
+          
+          // Fetch audio URL if exists
+          String? audioUrl;
+          try {
+            final audioResp = await http.get(Uri.parse('$_baseUrl/api/audio-chapters?where[chapter][equals]=${chapter['id']}&depth=1'));
+            if (audioResp.statusCode == 200) {
+              final audioDocs = jsonDecode(audioResp.body)['docs'] as List;
+              if (audioDocs.isNotEmpty) {
+                final ac = audioDocs[0];
+                if (ac['audio_file'] is Map && ac['audio_file']['url'] != null) {
+                  audioUrl = ac['audio_file']['url'];
+                }
+              }
             }
-            return '';
-          }
-          String contentText = 'No content found.';
-          if (chapter['content'] != null && chapter['content']['root'] != null) {
-            contentText = extractText(chapter['content']['root']);
-          }
+          } catch (_) {}
+
           return {
-            'id': chapter['id'], 'title': chapter['title'], 'slug': chapter['slug'], 'content': contentText,
+            'id': chapter['id'], 
+            'title': chapter['title'], 
+            'slug': chapter['slug'], 
+            'content': chapter['content'],
+            'chapterType': chapter['chapter_type'],
+            'audioUrl': audioUrl,
           };
         }
       }
