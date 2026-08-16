@@ -368,10 +368,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     child: Image.network(
                       authRepo.avatarUrl!,
                       fit: BoxFit.cover,
-                      headers: const {
-                        'User-Agent': 'Mozilla/5.0 (Mobile; Edumynt)',
-                        'Accept': 'image/*',
-                      },
                       errorBuilder: (context, error, stackTrace) => Center(
                         child: Text(
                           initial,

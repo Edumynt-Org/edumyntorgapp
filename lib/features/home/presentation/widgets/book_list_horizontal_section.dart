@@ -61,7 +61,7 @@ class BookListHorizontalSection extends StatelessWidget {
         const SizedBox(height: 12),
         // Horizontal Scroll
         SizedBox(
-          height: 230,
+          height: 270,
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,

@@ -28,9 +28,7 @@ class HomeScreen extends ConsumerWidget {
             floating: true,
             elevation: 0,
             scrolledUnderElevation: 0,
-            backgroundColor: Theme.of(
-              context,
-            ).scaffoldBackgroundColor.withValues(alpha: 0.95),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             titleSpacing: 16,
             toolbarHeight: 72,
             title: Row(
@@ -59,11 +57,6 @@ class HomeScreen extends ConsumerWidget {
                                 child: Image.network(
                                   authRepo.avatarUrl!,
                                   fit: BoxFit.cover,
-                                  headers: const {
-                                    'User-Agent':
-                                        'Mozilla/5.0 (Mobile; Edumynt)',
-                                    'Accept': 'image/*',
-                                  },
                                   errorBuilder: (context, error, stackTrace) =>
                                       Center(
                                         child: Text(
