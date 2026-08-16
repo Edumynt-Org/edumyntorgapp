@@ -17,13 +17,19 @@ class CatalogRepository {
     try {
       final response = await http.get(
         Uri.parse(
-          '$_baseUrl/api/book-lists?where[list_type][equals]=homepage&where[status][equals]=published&sort=sort_order',
+          '$_baseUrl/api/list-type-book-lists?where[list_type.slug][equals]=homepage&sort=sort_order&depth=1',
         ),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final lists = data['docs'] as List;
+        final junctions = data['docs'] as List;
+        
+        // Extract the actual book list from the junction table
+        final lists = junctions
+            .map((j) => j['book_list'])
+            .where((l) => l != null && l is Map && l['status'] == 'published')
+            .toList();
 
         List<BookListModel> result = [];
 
