@@ -3,260 +3,159 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/network/catalog_models.dart';
+import '../providers/home_providers.dart';
+import '../widgets/book_list_horizontal_section.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool _isLoading = true;
-  List<BookListModel> _homepageLists = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    final repo = ref.read(catalogRepositoryProvider);
-    final lists = await repo.getHomepageLists();
-    if (mounted) {
-      setState(() {
-        _homepageLists = lists;
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authRepo = ref.watch(authRepositoryProvider);
     final isAuthenticated = authRepo.isAuthenticated;
+
+    final homepageListsAsync = ref.watch(homepageListsProvider);
 
     return Scaffold(
       backgroundColor: isDark
           ? AppColors.backgroundDark
           : AppColors.backgroundLight,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    pinned: true,
-                    floating: true,
-                    elevation: 0,
-                    scrolledUnderElevation: 0,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0.95),
-                    titleSpacing: 16,
-                    toolbarHeight: 72,
-                    title: Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            if (isAuthenticated) {
-                              context.go('/profile');
-                            } else {
-                              context.go('/login');
-                            }
-                          },
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 24,
-                                backgroundColor: isDark
-                                    ? AppColors.surfaceDark
-                                    : AppColors.surfaceLight,
-                                child: Icon(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            floating: true,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            backgroundColor: Theme.of(
+              context,
+            ).scaffoldBackgroundColor.withValues(alpha: 0.95),
+            titleSpacing: 16,
+            toolbarHeight: 72,
+            title: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (isAuthenticated) {
+                      context.go('/profile');
+                    } else {
+                      context.go('/login');
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: isAuthenticated && authRepo.avatarUrl != null
+                            ? ClipOval(
+                                child: Image.network(
+                                  authRepo.avatarUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Center(
+                                        child: Text(
+                                          authRepo.userName?.isNotEmpty == true
+                                              ? authRepo.userName![0]
+                                                    .toUpperCase()
+                                              : 'R',
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w700,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                          ),
+                                        ),
+                                      ),
+                                ),
+                              )
+                            : Center(
+                                child: Text(
                                   isAuthenticated
-                                      ? Icons.person
-                                      : Icons.person_outline,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 28,
+                                      ? (authRepo.userName?.isNotEmpty == true
+                                            ? authRepo.userName![0]
+                                                  .toUpperCase()
+                                            : 'R')
+                                      : '👤',
+                                  style: TextStyle(
+                                    fontSize: isAuthenticated ? 20 : 24,
+                                    fontWeight: FontWeight.w700,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    isAuthenticated ? 'Welcome,' : 'Login',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isDark
-                                          ? AppColors.textMutedDark
-                                          : AppColors.textMutedLight,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    isAuthenticated
-                                        ? (authRepo.userName
-                                                  ?.split(' ')
-                                                  .first ??
-                                              'Reader')
-                                        : 'Guest',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w900,
-                                      fontFamily: 'Nunito',
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.surfaceDark
-                                : AppColors.surfaceLight,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            isAuthenticated ? 'Welcome,' : 'Login',
+                            style: TextStyle(
+                              fontSize: 12,
                               color: isDark
-                                  ? AppColors.borderDark
-                                  : AppColors.borderLight,
+                                  ? AppColors.textMutedDark
+                                  : AppColors.textMutedLight,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.local_fire_department_rounded,
-                                color: AppColors.accentDark,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '0',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.accentDark,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            isAuthenticated
+                                ? (authRepo.userName?.split(' ').first ??
+                                      'Reader')
+                                : 'Guest',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _buildContinueReading(isDark),
-                        const SizedBox(height: 32),
-                        ..._homepageLists.map(
-                          (list) => _buildCarousel(list, isDark),
-                        ),
-                      ]),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-    );
-  }
-
-  Widget _buildContinueReading(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Continue Reading',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w900,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : AppColors.backgroundLight,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                width: 2,
-              ),
-            ),
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Container(
-                  width: 60,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Center(
-                    child: Text('📖', style: TextStyle(fontSize: 24)),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.surfaceDark
+                        : AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.borderDark
+                          : AppColors.borderLight,
+                    ),
+                  ),
+                  child: Row(
                     children: [
-                      Text(
-                        'The Way of Kings',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
+                      Icon(
+                        Icons.local_fire_department_rounded,
+                        color: AppColors.accentDark,
+                        size: 20,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(width: 4),
                       Text(
-                        'Part 1, Chapter 3',
+                        '0',
                         style: TextStyle(
-                          fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? AppColors.textMutedDark
-                              : AppColors.textMutedLight,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        height: 12,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? AppColors.borderDark
-                              : AppColors.borderLight,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
-                          widthFactor: 0.35,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
+                          color: AppColors.accentDark,
                         ),
                       ),
                     ],
@@ -265,157 +164,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCarousel(BookListModel list, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 32.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              list.title,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: isDark ? Colors.white : Colors.black,
-              ),
+          homepageListsAsync.when(
+            loading: () => const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
             ),
+            error: (err, stack) => SliverFillRemaining(
+              child: Center(child: Text('Error loading lists: $err')),
+            ),
+            data: (lists) {
+              if (lists.isEmpty) {
+                return const SliverFillRemaining(
+                  child: Center(child: Text('No book lists found.')),
+                );
+              }
+              return SliverPadding(
+                padding: const EdgeInsets.only(top: 24.0, bottom: 32.0),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final list = lists[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 32.0),
+                      child: BookListHorizontalSection(bookList: list),
+                    );
+                  }, childCount: lists.length),
+                ),
+              );
+            },
           ),
-          if (list.description != null) ...[
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                list.description!,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: isDark
-                      ? AppColors.textMutedDark
-                      : AppColors.textMutedLight,
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          if (list.books.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isDark
-                        ? AppColors.borderDark
-                        : AppColors.borderLight,
-                    width: 2,
-                    style: BorderStyle.none,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: Text(
-                    'No books in this list yet.',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? AppColors.textMutedDark
-                          : AppColors.textMutedLight,
-                    ),
-                  ),
-                ),
-              ),
-            )
-          else
-            SizedBox(
-              height: 250,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                itemCount: list.books.length,
-                itemBuilder: (context, index) {
-                  final book = list.books[index];
-                  return _buildBookCard(book, isDark);
-                },
-              ),
-            ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBookCard(BookModel book, bool isDark) {
-    return GestureDetector(
-      onTap: () => context.push('/book/${book.slug}'),
-      child: Container(
-        width: 140,
-        margin: const EdgeInsets.symmetric(horizontal: 6.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.surfaceDark
-                      : AppColors.backgroundLight,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isDark
-                        ? AppColors.borderDark
-                        : AppColors.borderLight,
-                    width: 2,
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: book.coverUrl != null && book.coverUrl!.isNotEmpty
-                      ? Image.network(
-                          book.coverUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildPlaceholder(book.title),
-                        )
-                      : _buildPlaceholder(book.title),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              book.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
-                height: 1.2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder(String title) {
-    return Container(
-      color: Colors.grey.withValues(alpha: 0.2),
-      padding: const EdgeInsets.all(8.0),
-      child: Center(
-        child: Text(
-          title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-        ),
       ),
     );
   }

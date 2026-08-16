@@ -36,9 +36,11 @@ class CatalogRepository {
           );
 
           List<BookModel> books = [];
+          int totalBooks = 0;
           if (itemsResponse.statusCode == 200) {
             final itemsData = jsonDecode(itemsResponse.body);
             final items = itemsData['docs'] as List;
+            totalBooks = itemsData['totalDocs'] ?? 0;
 
             for (var item in items) {
               if (item['book'] != null && item['book'] is Map) {
@@ -55,7 +57,7 @@ class CatalogRepository {
             }
           }
 
-          result.add(BookListModel.fromJson(listData, books));
+          result.add(BookListModel.fromJson(listData, books, totalBooks));
         }
 
         return result;
@@ -64,6 +66,49 @@ class CatalogRepository {
     } catch (e) {
       debugPrint('Error fetching homepage lists: $e');
       return [];
+    }
+  }
+
+  Future<BookListModel?> getBookListById(String id) async {
+    try {
+      final listResponse = await http.get(
+        Uri.parse('$_baseUrl/api/book-lists/$id'),
+      );
+      if (listResponse.statusCode != 200) return null;
+      final listData = jsonDecode(listResponse.body);
+
+      final itemsResponse = await http.get(
+        Uri.parse(
+          '$_baseUrl/api/book-list-items?where[book_list][equals]=$id&sort=sort_order&depth=2&limit=100',
+        ),
+      );
+
+      List<BookModel> books = [];
+      int totalBooks = 0;
+      if (itemsResponse.statusCode == 200) {
+        final itemsData = jsonDecode(itemsResponse.body);
+        final items = itemsData['docs'] as List;
+        totalBooks = itemsData['totalDocs'] ?? 0;
+
+        for (var item in items) {
+          if (item['book'] != null && item['book'] is Map) {
+            final bookModel = BookModel.fromJson(item['book']);
+            final formattedBook = BookModel(
+              id: bookModel.id,
+              title: bookModel.title,
+              slug: bookModel.slug,
+              coverUrl: _formatCoverUrl(bookModel.coverUrl),
+              description: bookModel.description,
+            );
+            books.add(formattedBook);
+          }
+        }
+      }
+
+      return BookListModel.fromJson(listData, books, totalBooks);
+    } catch (e) {
+      debugPrint('Error fetching book list details: $e');
+      return null;
     }
   }
 

@@ -72,23 +72,27 @@ class BookListModel {
   final String title;
   final String? description;
   final List<BookModel> books;
+  final int totalBooks;
 
   BookListModel({
     required this.id,
     required this.title,
     this.description,
     this.books = const [],
+    this.totalBooks = 0,
   });
 
   factory BookListModel.fromJson(
     Map<String, dynamic> json,
     List<BookModel> books,
+    int totalBooks,
   ) {
     return BookListModel(
       id: json['id'],
       title: json['title'],
       description: json['description'],
       books: books,
+      totalBooks: totalBooks,
     );
   }
 }

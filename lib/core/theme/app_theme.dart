@@ -8,32 +8,59 @@ class AppTheme {
   static TextTheme _buildTextTheme(TextTheme base, Color textColor) {
     return GoogleFonts.interTextTheme(base)
         .copyWith(
-          displayLarge: GoogleFonts.nunito(
-            textStyle: base.displayLarge?.copyWith(color: textColor),
+          displayLarge: GoogleFonts.inter(
+            textStyle: base.displayLarge?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          displayMedium: GoogleFonts.nunito(
-            textStyle: base.displayMedium?.copyWith(color: textColor),
+          displayMedium: GoogleFonts.inter(
+            textStyle: base.displayMedium?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          displaySmall: GoogleFonts.nunito(
-            textStyle: base.displaySmall?.copyWith(color: textColor),
+          displaySmall: GoogleFonts.inter(
+            textStyle: base.displaySmall?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          headlineLarge: GoogleFonts.nunito(
-            textStyle: base.headlineLarge?.copyWith(color: textColor),
+          headlineLarge: GoogleFonts.inter(
+            textStyle: base.headlineLarge?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          headlineMedium: GoogleFonts.nunito(
-            textStyle: base.headlineMedium?.copyWith(color: textColor),
+          headlineMedium: GoogleFonts.inter(
+            textStyle: base.headlineMedium?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          headlineSmall: GoogleFonts.nunito(
-            textStyle: base.headlineSmall?.copyWith(color: textColor),
+          headlineSmall: GoogleFonts.inter(
+            textStyle: base.headlineSmall?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          titleLarge: GoogleFonts.nunito(
-            textStyle: base.titleLarge?.copyWith(color: textColor),
+          titleLarge: GoogleFonts.inter(
+            textStyle: base.titleLarge?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          titleMedium: GoogleFonts.nunito(
-            textStyle: base.titleMedium?.copyWith(color: textColor),
+          titleMedium: GoogleFonts.inter(
+            textStyle: base.titleMedium?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          titleSmall: GoogleFonts.nunito(
-            textStyle: base.titleSmall?.copyWith(color: textColor),
+          titleSmall: GoogleFonts.inter(
+            textStyle: base.titleSmall?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         )
         .apply(bodyColor: textColor, displayColor: textColor);

@@ -22,6 +22,10 @@ class AuthRepository extends ChangeNotifier {
     _userName = _prefs.getString('user_name');
     _avatarUrl = _prefs.getString('user_avatar');
     _isLoading = false;
+
+    if (_token != null) {
+      _fetchProfileDetails();
+    }
   }
 
   bool get isAuthenticated => _token != null;
@@ -29,6 +33,80 @@ class AuthRepository extends ChangeNotifier {
   String? get token => _token;
   String? get userName => _userName;
   String? get avatarUrl => _avatarUrl;
+
+  Future<void> _fetchProfileDetails() async {
+    if (_token == null) return;
+    try {
+      final meRes = await http.get(
+        Uri.parse('$_baseUrl/me'),
+        headers: {'Authorization': 'JWT $_token'},
+      );
+      if (meRes.statusCode == 200) {
+        final data = jsonDecode(meRes.body);
+        final user = data['user'];
+        if (user != null) {
+          if (user['name'] != null) {
+            _userName = user['name'];
+            await _prefs.setString('user_name', _userName!);
+          }
+          if (user['id'] != null) {
+            try {
+              debugPrint('Fetching profile for user: ${user['id']}');
+              final profileRes = await http.get(
+                Uri.parse(
+                  '${ApiConfig.baseUrl}/api/profiles?where[user][equals]=${user['id']}',
+                ),
+                headers: {'Authorization': 'JWT $_token'},
+              );
+              debugPrint('Profile fetch status: ${profileRes.statusCode}');
+              if (profileRes.statusCode == 200) {
+                final profileData = jsonDecode(profileRes.body);
+                if (profileData['docs'] != null &&
+                    profileData['docs'].isNotEmpty) {
+                  final profile = profileData['docs'][0];
+                  if (profile['avatar'] != null) {
+                    final avatarData = profile['avatar'];
+                    debugPrint('Avatar data type: ${avatarData.runtimeType}');
+                    if (avatarData is Map && avatarData['url'] != null) {
+                      final url = avatarData['url'] as String;
+                      _avatarUrl = url.startsWith('http')
+                          ? url
+                          : '${ApiConfig.baseUrl}$url';
+                    } else if (avatarData is String) {
+                      debugPrint('Fetching media for avatar ID: $avatarData');
+                      final mediaRes = await http.get(
+                        Uri.parse('${ApiConfig.baseUrl}/api/media/$avatarData'),
+                      );
+                      if (mediaRes.statusCode == 200) {
+                        final mediaData = jsonDecode(mediaRes.body);
+                        if (mediaData['url'] != null) {
+                          final url = mediaData['url'] as String;
+                          _avatarUrl = url.startsWith('http')
+                              ? url
+                              : '${ApiConfig.baseUrl}$url';
+                        }
+                      }
+                    }
+                    if (_avatarUrl != null) {
+                      debugPrint('Successfully set avatar URL: $_avatarUrl');
+                      await _prefs.setString('user_avatar', _avatarUrl!);
+                    }
+                  } else {
+                    debugPrint('No avatar field in profile.');
+                  }
+                } else {
+                  debugPrint('No profile document found for user.');
+                }
+              }
+            } catch (e) {
+              debugPrint('Error fetching profile: $e');
+            }
+          }
+          notifyListeners();
+        }
+      }
+    } catch (_) {}
+  }
 
   Future<void> _setToken(String? token) async {
     _token = token;

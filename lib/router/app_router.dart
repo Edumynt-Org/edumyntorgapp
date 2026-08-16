@@ -5,6 +5,7 @@ import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
+import '../features/home/presentation/screens/book_list_screen.dart';
 import '../features/books/presentation/screens/books_screen.dart';
 import '../features/books/presentation/screens/book_detail_screen.dart';
 import '../features/profile/presentation/screens/profile_screen.dart';
@@ -35,6 +36,11 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/forgot-password',
       builder: (context, state) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
+      path: '/book-list/:id',
+      builder: (context, state) =>
+          BookListScreen(listId: state.pathParameters['id']!),
     ),
     GoRoute(
       path: '/book/:slug',

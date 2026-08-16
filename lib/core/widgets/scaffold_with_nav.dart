@@ -49,9 +49,8 @@ class _ScaffoldWithNavState extends State<ScaffoldWithNav> {
                 children: [
                   // The animated sliding pill
                   AnimatedPositioned(
-                    duration: const Duration(milliseconds: 350),
-                    curve:
-                        Curves.easeOutBack, // Gives a nice little bounce effect
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOutCubic, // Smooth slide without bounce
                     left:
                         (currentIndex * tabWidth) +
                         (tabWidth / 2) -
