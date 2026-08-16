@@ -362,25 +362,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ).colorScheme.primary.withValues(alpha: 0.3),
                 width: 4,
               ),
-              image: authRepo.avatarUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(authRepo.avatarUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
             ),
-            child: authRepo.avatarUrl == null
-                ? Center(
+            child: authRepo.avatarUrl != null
+                ? ClipOval(
+                    child: Image.network(
+                      authRepo.avatarUrl!,
+                      fit: BoxFit.cover,
+                      headers: const {
+                        'User-Agent': 'Mozilla/5.0 (Mobile; Edumynt)',
+                        'Accept': 'image/*',
+                      },
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Text(
+                          initial,
+                          style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : Center(
                     child: Text(
                       initial,
                       style: TextStyle(
                         fontSize: 36,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-                  )
-                : null,
+                  ),
           ),
           const SizedBox(height: 16),
           Text(

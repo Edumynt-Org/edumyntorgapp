@@ -159,10 +159,27 @@ class AuthRepository extends ChangeNotifier {
                 if (profileData['docs'] != null &&
                     profileData['docs'].isNotEmpty) {
                   final profile = profileData['docs'][0];
-                  if (profile['avatar'] != null &&
-                      profile['avatar']['url'] != null) {
-                    _avatarUrl =
-                        '${ApiConfig.baseUrl}${profile['avatar']['url']}';
+                  final avatarData = profile['avatar'];
+                  if (avatarData is Map && avatarData['url'] != null) {
+                    final url = avatarData['url'] as String;
+                    _avatarUrl = url.startsWith('http')
+                        ? url
+                        : '${ApiConfig.baseUrl}$url';
+                  } else if (avatarData is String) {
+                    final mediaRes = await http.get(
+                      Uri.parse('${ApiConfig.baseUrl}/api/media/$avatarData'),
+                    );
+                    if (mediaRes.statusCode == 200) {
+                      final mediaData = jsonDecode(mediaRes.body);
+                      if (mediaData['url'] != null) {
+                        final url = mediaData['url'] as String;
+                        _avatarUrl = url.startsWith('http')
+                            ? url
+                            : '${ApiConfig.baseUrl}$url';
+                      }
+                    }
+                  }
+                  if (_avatarUrl != null) {
                     await _prefs.setString('user_avatar', _avatarUrl!);
                   }
                 }
