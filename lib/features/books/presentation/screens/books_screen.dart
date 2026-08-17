@@ -17,7 +17,6 @@ class BooksScreen extends ConsumerStatefulWidget {
 class _BooksScreenState extends ConsumerState<BooksScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-  bool _isSearchExpanded = false;
 
   bool _isLoading = true;
   List<BookModel> _books = [];
@@ -64,118 +63,67 @@ class _BooksScreenState extends ConsumerState<BooksScreen> {
       backgroundColor: isDark
           ? AppColors.backgroundDark
           : AppColors.backgroundLight,
-      appBar: AppBar(
-        backgroundColor: isDark
-            ? AppColors.backgroundDark
-            : AppColors.backgroundLight,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: _isSearchExpanded
-            ? TextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                autofocus: true,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  hintStyle: TextStyle(
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                    width: 2,
                   ),
-                  border: InputBorder.none,
                 ),
-              )
-            : const Text(
-                'Books',
-                style: TextStyle(fontWeight: FontWeight.w900),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (query) {
+                    setState(() {});
+                    _onSearchChanged(query);
+                  },
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Search Book, author, genre, etc.',
+                    hintStyle: TextStyle(
+                      color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                    ),
+                    prefixIcon: Icon(Icons.search, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.close, color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                _search('');
+                              });
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                ),
               ),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isSearchExpanded ? Icons.close : Icons.search,
-              color: isDark ? Colors.white : Colors.black,
             ),
-            onPressed: () {
-              setState(() {
-                _isSearchExpanded = !_isSearchExpanded;
-                if (!_isSearchExpanded) {
-                  _searchController.clear();
-                  _search('');
-                }
-              });
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildFilterChips(isDark),
-          const SizedBox(height: 16),
-          Expanded(
-            child: _isLoading
-                ? const BookGridSkeleton(count: 9)
-                : _books.isEmpty
-                ? _buildEmptyState(isDark)
-                : _buildGrid(isDark),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChips(bool isDark) {
-    return SizedBox(
-      height: 44,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        children: [
-          _buildChip('All Books', true, isDark),
-          const SizedBox(width: 8),
-          _buildChip('Audiobooks 🎧', false, isDark),
-          const SizedBox(width: 8),
-          _buildChip('Ebooks 📖', false, isDark),
-          const SizedBox(width: 8),
-          _buildChip('Fantasy', false, isDark),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip(String label, bool isSelected, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-            : (isDark ? AppColors.surfaceDark : AppColors.backgroundLight),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)
-              : (isDark ? AppColors.borderDark : AppColors.borderLight),
-          width: 2,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : (isDark ? Colors.white : Colors.black),
-          ),
+            Expanded(
+              child: _isLoading
+                  ? const BookGridSkeleton(count: 9)
+                  : _books.isEmpty
+                  ? _buildEmptyState(isDark)
+                  : _buildGrid(isDark),
+            ),
+          ],
         ),
       ),
     );
   }
+
+
 
   Widget _buildEmptyState(bool isDark) {
     return Center(

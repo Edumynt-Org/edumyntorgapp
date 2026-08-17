@@ -495,70 +495,80 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
         children: [
           CustomScrollView(
             slivers: [
-              // 1. Transparent App Bar
-              SliverAppBar(
-                pinned: true,
-                backgroundColor: bgColor,
-                elevation: 0,
-                scrolledUnderElevation: 0,
-                leading: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: textColor),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-                actions: [
-                  IconButton(
-                    icon: Icon(Icons.share_outlined, color: textColor),
-                    onPressed: () {},
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: IconButton(
-                      icon: Icon(Icons.file_download_outlined, color: textColor),
-                      onPressed: _showDownloadsModal,
-                    ),
-                  ),
-                ],
-              ),
-              
-              // 2. Hero Section
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                  child: Column(
-                    children: [
-                      // Cover
-                      Hero(
-                        tag: 'book-cover-${book.slug}',
-                        child: GestureDetector(
-                          onTap: () => _showCoverDialog(book),
-                          child: Container(
-                            width: 160,
-                            height: 240,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: book.coverUrl != null && book.coverUrl!.isNotEmpty
-                                  ? Image.network(book.coverUrl!, fit: BoxFit.cover)
-                                  : Container(
-                                      color: isDark ? AppColors.surfaceDark : Colors.white,
-                                      alignment: Alignment.center,
-                                      child: Text(book.title, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+              // 1. Hero Section & Actions
+              SliverSafeArea(
+                bottom: false,
+                sliver: SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16.0, left: 24.0, right: 24.0, bottom: 16.0),
+                    child: Column(
+                      children: [
+                        Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Left: Empty space to balance the row (Close button is sticky in Stack)
+                          const SizedBox(width: 48, height: 48),
+
+                          // Center: Cover
+                          Hero(
+                            tag: 'book-cover-${book.slug}',
+                            child: GestureDetector(
+                              onTap: () => _showCoverDialog(book),
+                              child: Container(
+                                width: 160,
+                                height: 240,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.15),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
                                     ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                                      ? Image.network(book.coverUrl!, fit: BoxFit.cover)
+                                      : Container(
+                                          color: isDark ? AppColors.surfaceDark : Colors.white,
+                                          alignment: Alignment.center,
+                                          child: Text(book.title, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+                                        ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+
+                          // Right: Share & Download
+                          Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.share_outlined, color: textColor),
+                                  onPressed: () {},
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.file_download_outlined, color: textColor),
+                                  onPressed: _showDownloadsModal,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 24),
                       
@@ -681,6 +691,7 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                   ),
                 ),
               ),
+              ),
 
               // 3. Edition Selector
               if (_bundle!.editions.length > 1)
@@ -720,6 +731,28 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                 ),
 
               // 4. Content (Chapters List)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  child: Row(
+                    children: [
+                      Expanded(child: Divider(color: isDark ? AppColors.borderDark : AppColors.borderLight)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Content',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: isDark ? AppColors.borderDark : AppColors.borderLight)),
+                    ],
+                  ),
+                ),
+              ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 120), // Padding bottom for FAB
                 sliver: SliverList(
@@ -746,7 +779,8 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      minimumSize: const Size.fromHeight(48),
+                      padding: EdgeInsets.zero,
                       elevation: 8,
                       shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -771,7 +805,8 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accentLight, // Gold for audio
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        minimumSize: const Size.fromHeight(48),
+                        padding: EdgeInsets.zero,
                         elevation: 8,
                         shadowColor: AppColors.accentLight.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -788,6 +823,23 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
                   ),
                 ]
               ],
+            ),
+          ),
+
+          // 6. Sticky Close Button
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 16.0, left: 24.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.close, color: textColor),
+                  onPressed: () => context.pop(),
+                ),
+              ),
             ),
           ),
         ],

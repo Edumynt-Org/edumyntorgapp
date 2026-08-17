@@ -6,7 +6,6 @@ import '../../../../core/providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/network/catalog_models.dart';
 import '../widgets/lexical_renderer.dart';
-import '../widgets/mini_player.dart';
 
 class ReaderScreen extends ConsumerStatefulWidget {
   final String slug;
@@ -296,7 +295,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final hasNext = currentIndex >= 0 && currentIndex < flatToc.length - 1;
 
     String title = _chapterContent?['title'] ?? 'Chapter';
-    String? audioUrl = _chapterContent?['audioUrl'];
 
     return Scaffold(
       key: _scaffoldKey,
@@ -429,21 +427,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               ),
             ),
 
-            // Mini Player (Only if audio URL is available)
-            if (audioUrl != null)
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                bottom: _showUI ? 0 : -150, // Hide with UI
-                left: 0,
-                right: 0,
-                child: MiniPlayer(
-                  audioUrl: audioUrl,
-                  chapterId: widget.chapterId,
-                  bookSlug: widget.slug,
-                  title: title,
-                ),
-              ),
+
           ],
         ),
       ),
