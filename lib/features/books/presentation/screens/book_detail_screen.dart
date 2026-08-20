@@ -467,34 +467,49 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
     final bgColor = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
     final textColor = isDark ? AppColors.textDark : AppColors.textLight;
 
-    if (_isLoading) {
-      return Scaffold(
-        backgroundColor: bgColor,
-        appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, leading: const BackButton()),
-        body: const BookDetailSkeleton(),
-      );
-    }
-
-    if (_bundle == null) {
-      return Scaffold(
-        backgroundColor: bgColor,
-        appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, leading: const BackButton()),
-        body: Center(
-          child: Text('Book not found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
-        ),
-      );
-    }
-
-    final book = _bundle!.book;
-    final hasAudio = _currentEditionHasAudio();
-    final List<TocItemModel> toc = _selectedEditionId != null ? (_bundle!.editionStructures[_selectedEditionId] ?? <TocItemModel>[]) : <TocItemModel>[];
-
     return Scaffold(
       backgroundColor: bgColor,
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
+          if (_isLoading)
+            const BookDetailSkeleton()
+          else if (_bundle == null)
+            Center(
+              child: Text('Book not found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
+            )
+          else
+            _buildLoadedContent(context, isDark, textColor),
+
+          // Sticky Close Button always rendered
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 16.0, left: 24.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.close, color: textColor),
+                  onPressed: () => context.pop(),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadedContent(BuildContext context, bool isDark, Color textColor) {
+    final book = _bundle!.book;
+    final hasAudio = _currentEditionHasAudio();
+    final List<TocItemModel> toc = _selectedEditionId != null ? (_bundle!.editionStructures[_selectedEditionId] ?? <TocItemModel>[]) : <TocItemModel>[];
+
+    return Stack(
+      children: [
+        CustomScrollView(
+          slivers: [
               // 1. Hero Section & Actions
               SliverSafeArea(
                 bottom: false,
@@ -825,25 +840,7 @@ class _BookDetailScreenState extends ConsumerState<BookDetailScreen> {
               ],
             ),
           ),
-
-          // 6. Sticky Close Button
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 16.0, left: 24.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: IconButton(
-                  icon: Icon(Icons.close, color: textColor),
-                  onPressed: () => context.pop(),
-                ),
-              ),
-            ),
-          ),
         ],
-      ),
     );
   }
 

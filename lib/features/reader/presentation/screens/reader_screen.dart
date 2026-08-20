@@ -402,7 +402,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     children: [
                       IconButton(
                         icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
-                        onPressed: () => context.go('/book/${widget.slug}'),
+                        onPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/book/${widget.slug}');
+                          }
+                        },
                       ),
                       Expanded(
                         child: Text(

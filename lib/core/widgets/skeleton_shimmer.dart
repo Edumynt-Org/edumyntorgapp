@@ -48,65 +48,95 @@ class ShimmerWrap extends StatelessWidget {
   }
 }
 
-/// Skeleton for the book detail page — matches the real layout structure
 class BookDetailSkeleton extends StatelessWidget {
   const BookDetailSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final coverWidth = screenWidth * 0.45;
-    final coverHeight = coverWidth * 1.5;
 
     return ShimmerWrap(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: AppSpacing.xl),
-            // Cover placeholder
-            SkeletonBox(
-              width: coverWidth,
-              height: coverHeight,
-              borderRadius: AppRadius.lg,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            // Title
-            const SkeletonBox(width: 200, height: 24),
-            const SizedBox(height: AppSpacing.sm),
-            // Author
-            const SkeletonBox(width: 140, height: 16),
-            const SizedBox(height: AppSpacing.lg),
-            // Action buttons row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SkeletonBox(width: 100, height: 44, borderRadius: AppRadius.pill),
-                const SizedBox(width: AppSpacing.md),
-                SkeletonBox(width: 100, height: 44, borderRadius: AppRadius.pill),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            // Edition tabs
-            const Row(
-              children: [
-                SkeletonBox(width: 80, height: 32),
-                SizedBox(width: AppSpacing.sm),
-                SkeletonBox(width: 80, height: 32),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            // TOC items
-            ...List.generate(6, (i) => Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: Row(
+            // Safe area space equivalent and padding matching detail screen
+            const SizedBox(height: 16.0 + 48.0), // typical top padding + close button space
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
                 children: [
-                  const SkeletonBox(width: 32, height: 32, borderRadius: AppRadius.md),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(child: SkeletonBox(width: double.infinity, height: 16, borderRadius: AppRadius.sm)),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Left space (for sticky close button)
+                      const SizedBox(width: 48, height: 48),
+                      // Center cover
+                      SkeletonBox(width: 160, height: 240, borderRadius: 16),
+                      // Right share & download buttons
+                      Column(
+                        children: [
+                          SkeletonBox(width: 48, height: 48, borderRadius: 16),
+                          const SizedBox(height: 12),
+                          SkeletonBox(width: 48, height: 48, borderRadius: 16),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Title
+                  SkeletonBox(width: screenWidth * 0.7, height: 32),
+                  const SizedBox(height: 8),
+                  // Author
+                  SkeletonBox(width: screenWidth * 0.4, height: 20),
+                  const SizedBox(height: 12),
+                  // Year and Language
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SkeletonBox(width: 40, height: 16),
+                      const SizedBox(width: 12),
+                      SkeletonBox(width: 10, height: 16),
+                      const SizedBox(width: 12),
+                      SkeletonBox(width: 40, height: 16),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Description
+                  SkeletonBox(width: double.infinity, height: 16),
+                  const SizedBox(height: 6),
+                  SkeletonBox(width: double.infinity, height: 16),
+                  const SizedBox(height: 6),
+                  SkeletonBox(width: screenWidth * 0.8, height: 16),
                 ],
               ),
+            ),
+            const SizedBox(height: 24),
+            // Edition Selector Box
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: SkeletonBox(width: double.infinity, height: 48, borderRadius: 12),
+            ),
+            const SizedBox(height: 16),
+            // Content Divider
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                children: [
+                  Expanded(child: SkeletonBox(width: double.infinity, height: 1)),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: SkeletonBox(width: 60, height: 16),
+                  ),
+                  Expanded(child: SkeletonBox(width: double.infinity, height: 1)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // TOC List
+            ...List.generate(6, (i) => Padding(
+              padding: const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 16.0),
+              child: SkeletonBox(width: double.infinity, height: 48),
             )),
           ],
         ),
